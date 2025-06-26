@@ -123,6 +123,34 @@ Original box             |  Deformed box
 :-------------------------:|:-------------------------:
 ![](docs/assets/example_1_original_control_points.png)  |  ![](docs/assets/example_1_deformed_control_points.png)
 
+Similarly the Free Form Deformer can be used. This gives more control over the deformation process and can be used for deforming specific parts of the mesh without affecting the rest of the mesh. Starting from the same geometry as before, we can define a design block (the specific region we want to deform) and deform the geometry as follows:
+
+```python
+design_block = morph.DesignBlock([0.8, 1.2, 1.2], [0.2, 0.0, 0.0], [0.0, 0.0, 0.0], [2, 2, 2])
+
+free_design_ids = design_block.select_free_design_nodes(geometry, 2)
+
+transformation_matrix = gmac.build_transformation_matrix([0.25, 0.0, 0.0], [45.0, 0.0, 0.0], [1.0, 1.5, 1.5])
+
+deformed_design_nodes = np.array(design_block.nodes)
+deformed_design_nodes[free_design_ids] = gmac.transform_nodes(
+    deformed_design_nodes[free_design_ids],
+    transformation_matrix,
+    [0.2, 0., 0.],
+)
+
+ffd = morph.FreeFormDeformer(design_block)
+
+geometry.nodes = ffd.deform(geometry.nodes, deformed_design_nodes)
+
+io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")
+```
+
+Original box             |  Deformed box
+:-------------------------:|:-------------------------:
+![](docs/assets/example_2_original_control_points.png)  |  ![](docs/assets/example_2_deformed_control_points.png)
+
+
 # Examples in Rust
 ## Using GMAC to deform a box
 Using the gmac_morph library a box can be deformed using both RBF and FFD tools. In this case we will demonstrate the FFD process.
@@ -149,9 +177,9 @@ Now lets specify the design block that we want to use to map our deformation:
 We will now deform the design block nodes so that the deformation can be mapped to the box. First we will clone the nodes. Then select the last layer of the nodes and transform it:
 ```rust
 ...
-    let mut deformed_design_nodes = design_block.nodes.clone();
-
     let free_design_ids = design_block.select_free_design_nodes(&geometry, Some(2)).unwrap();
+
+    let mut deformed_design_nodes = design_block.nodes.clone();
 
     let transformation_matrix =
         build_transformation_matrix([0.25, 0.0, 0.0], [45.0, 0.0, 0.0], [1.0, 1.5, 1.5]);
@@ -169,13 +197,9 @@ Lets create the free form deformer and deform the target nodes:
     geometry.nodes = ffd.deform(&target_nodes, &deformed_design_nodes).unwrap();
 
     write_vtu(&geometry.nodes, &geometry.cells, Some("target/deformed.vtu")).unwrap();
-
     write_stl(&geometry.nodes, &geometry.cells, Some("target/deformed.stl")).unwrap();
 ...
 ```
-Original box             |  Deformed box
-:-------------------------:|:-------------------------:
-![](docs/assets/example_2_original_control_points.png)  |  ![](docs/assets/example_2_deformed_control_points.png)
 
 ### References
 
