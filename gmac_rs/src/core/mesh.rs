@@ -1,4 +1,4 @@
-use crate::selection::select_nodes_in_plane_direction;
+use crate::core::selection::select_nodes_in_plane_direction;
 
 /// Represents a standard 3D mesh.
 /// A `Mesh` consists of nodes representing points in 3D space,

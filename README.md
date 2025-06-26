@@ -1,7 +1,7 @@
 # GMAC
 [![Build & Test](https://github.com/alexlovric/gmac/actions/workflows/build&test.yml/badge.svg?branch=main)](https://github.com/alexlovric/gmac/actions/workflows/build&test.yml)
 
-A fast geometry manipulation and creation library made in rust, with a convenient python interface. Primary features include:
+A fast geometry manipulation and creation library made in rust, with a convenient python interface, and very few dependencies. Primary features include:
 - Create primitives
 - Transform geometries (or selection just a selection of nodes)
 - Large range of selection and transformation tools
@@ -27,7 +27,7 @@ python3 -m pip install /path/to/wheel
 ## Rust
 Ensure Cargo is installed on your system.
 ```bash
-gmac = { git = "https://github.com/smallspark-space/s4-gmac"}
+gmac = { git = "https://github.com/alexlovric/gmac"}
 ```
 
 # Contributing

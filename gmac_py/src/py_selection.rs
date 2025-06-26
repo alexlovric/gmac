@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use gmac_core::selection::{
+use gmac::core::selection::{
     select_nodes_closest_to_point, select_nodes_on_line, select_nodes_in_sphere,
     select_nodes_in_box, select_nodes_closest_to_plane, select_nodes_in_plane_direction,
 };

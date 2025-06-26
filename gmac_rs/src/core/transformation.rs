@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use crate::algebra::{mat3_mat3_mul, mat3_vec3_mul, mat4_vec4_mul};
+use crate::core::algebra::{mat3_mat3_mul, mat3_vec3_mul, mat4_vec4_mul};
 
 /// Transforms a list of 3D points using a 4x4 transformation matrix.
 ///

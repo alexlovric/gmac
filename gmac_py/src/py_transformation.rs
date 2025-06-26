@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use gmac_core::transformation::{
+use gmac::core::transformation::{
     translate_nodes, rotate_nodes, scale_nodes, transform_nodes,
     build_transformation_matrix,
 };

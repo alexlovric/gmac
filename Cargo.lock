@@ -386,40 +386,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "gmac"
-version = "0.0.1"
-dependencies = [
- "gmac_core",
- "gmac_io",
- "gmac_morph",
-]
-
-[[package]]
-name = "gmac_core"
-version = "0.0.1"
-
-[[package]]
-name = "gmac_io"
-version = "0.0.1"
-
-[[package]]
-name = "gmac_morph"
-version = "0.0.1"
-dependencies = [
- "approx 0.5.1",
- "gmac_core",
- "ndarray",
- "ndarray-linalg",
-]
-
-[[package]]
 name = "gmac_py"
 version = "0.0.1"
 dependencies = [
- "gmac_core",
- "gmac_io",
- "gmac_morph",
+ "gmac_rs",
  "pyo3",
+]
+
+[[package]]
+name = "gmac_rs"
+version = "0.0.1"
+dependencies = [
+ "approx 0.5.1",
+ "ndarray",
+ "ndarray-linalg",
 ]
 
 [[package]]

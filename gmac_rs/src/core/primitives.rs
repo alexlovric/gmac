@@ -1,6 +1,6 @@
 use crate::{
-    mesh::Mesh,
-    transformation::{build_rotation_matrix, rotate_node},
+    core::mesh::Mesh,
+    core::transformation::{build_rotation_matrix, rotate_node},
 };
 
 /// Creates a new box mesh. A box here is a shell, in that it is only the walls of

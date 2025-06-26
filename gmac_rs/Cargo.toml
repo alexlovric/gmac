@@ -1,0 +1,23 @@
+[package]
+name = "gmac_rs"
+version = "0.0.1"
+authors = ["Aleksander Lovric <alexlovric@gmail.com>"]
+description = "Blazingly fast geometry manipulation and creation library"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/alexlovric/gmac"
+keywords = ["geometry", "morphing", "ffd", "rbf"]
+categories = ["science", "graphics"]
+
+[lib]
+name = "gmac"
+path = "src/lib.rs"
+test = true
+doctest = false
+
+[dependencies]
+ndarray = { version = "0.15.6", default-features = false } # Only necessary for Rbf linear solving
+ndarray-linalg = { version = "0.16", features = ["intel-mkl-static"] } # Only necessary for Rbf linear solving
+
+[dev-dependencies]
+approx = "0.5"

@@ -1,4 +1,4 @@
-use gmac_core::{
+use crate::core::{
     clusters::generate_block_cluster,
     transformation::{rotate_nodes, rotate_node, build_rotation_matrix},
     mesh::Mesh,

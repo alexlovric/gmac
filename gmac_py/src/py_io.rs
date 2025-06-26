@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use gmac_io::{stl::write_stl, vtk::write_vtp};
+use gmac::io::{stl::write_stl, vtk::write_vtp};
 
 /// Write Ascii stl file
 #[pyfunction(name = "write_stl")]
