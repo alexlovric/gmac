@@ -1,0 +1,37 @@
+name: Publish gmac_rs Crate
+
+on:
+  workflow_dispatch:  # Manual trigger via GitHub UI
+  release:
+    types: [published]  # Triggered when a GitHub Release is published
+  push:
+    tags:
+      - "gmac_rs-v*" # Triggered when a tag like gmac_rs-v0.1.0 is pushed
+
+jobs:
+  publish:
+    name: Publish gmac_rs to crates.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Set up Rust
+        uses: actions/setup-rust@v1
+        with:
+          rust-version: stable
+
+      - name: 📋 Prepare crate (copy shared files)
+        run: |
+          cp README.md gmac_rs/
+          cp license gmac_rs/LICENSE
+          cp -r docs gmac_rs/
+
+      - name: 🔍 Dry run (preview contents)
+        working-directory: ./gmac_rs
+        run: cargo package --list --allow-dirty
+
+      - name: 🚀 Publish to crates.io
+        working-directory: ./gmac_rs
+        run: cargo publish --allow-dirty --token ${{ secrets.CRATES_IO_TOKEN }}

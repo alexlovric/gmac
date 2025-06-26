@@ -12,23 +12,10 @@ A fast geometry manipulation and creation library made in rust, with a convenien
 Here's a demonstration of a plane tail deformed using the Free Form deformer (FFD):
 Variation 1             |  Variation 2
 :-------------------------:|:-------------------------:
-![](docs/assets/plane_tail_variation1a.png)  |  ![](docs/assets/plane_tail_variation2a.png)
+![A](docs/plane_tail_variation1a.png)  |  ![B](docs/plane_tail_variation2a.png)
 
 
 <sup>Both plane tail variations were created using the Gmac Free Form deformer (FFD).</sup>
-
-# Setup
-## Python
-Make sure that Python3 is installed on your system.
-```bash
-python3 -m pip install /path/to/wheel
-```
-
-## Rust
-Ensure Cargo is installed on your system.
-```bash
-gmac = { git = "https://github.com/alexlovric/gmac"}
-```
 
 # Contributing
 ## Build python from source
@@ -121,7 +108,7 @@ Here you can see the original control points and mesh, as well as the deformed c
 
 Original box             |  Deformed box
 :-------------------------:|:-------------------------:
-![](docs/assets/example_1_original_control_points.png)  |  ![](docs/assets/example_1_deformed_control_points.png)
+![A](docs/example_1_original_control_points.png)  |  ![B](docs/example_1_deformed_control_points.png)
 
 Similarly the Free Form Deformer can be used. This gives more control over the deformation process and can be used for deforming specific parts of the mesh without affecting the rest of the mesh. Starting from the same geometry as before, we can define a design block (the specific region we want to deform) and deform the geometry as follows:
 
@@ -148,7 +135,7 @@ io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")
 
 Original box             |  Deformed box
 :-------------------------:|:-------------------------:
-![](docs/assets/example_2_original_control_points.png)  |  ![](docs/assets/example_2_deformed_control_points.png)
+![A](docs/example_2_original_control_points.png)  |  ![B](docs/example_2_deformed_control_points.png)
 
 
 # Examples in Rust
