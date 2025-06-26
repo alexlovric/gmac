@@ -27,7 +27,7 @@ python3 -m pip install /path/to/wheel
 ## Rust
 Ensure Cargo is installed on your system.
 ```bash
-gmac = { git = "https://github.com/smallspark-space/s4-gmac"}
+gmac = { git = "https://github.com/alexlovric/gmac"}
 ```
 
 # Contributing
