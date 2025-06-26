@@ -53,7 +53,7 @@ pub fn generate_box(
     let n_nodes = (rx + 1) * (ry + 1) * (rz + 1) - (rx - 1) * (ry - 1) * (rz - 1);
     let mut nodes = vec![[0.0; 3]; n_nodes];
 
-    let mut sides = vec![
+    let mut sides = [
         Vec::with_capacity((ry + 1) * (rz + 1)), // Min x
         Vec::with_capacity((ry + 1) * (rz + 1)), // Max x
         Vec::with_capacity((rx + 1) * (rz + 1)), // Min y

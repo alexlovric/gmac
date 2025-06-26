@@ -9,10 +9,10 @@
 /// * `Err(String)` if the system cannot be solved, with an error message.
 pub fn lu_linear_solver(
     mat: &Vec<Vec<f64>>,
-    rhs: &Vec<Vec<f64>>,
+    rhs: &[Vec<f64>],
 ) -> Result<Vec<Vec<f64>>, String> {
     let mat_rows = mat.len();
-    let rhs_dim = if let Some(first_row) = rhs.get(0) {
+    let rhs_dim = if let Some(first_row) = rhs.first() {
         first_row.len()
     } else {
         return Err(String::from("No rhs dimensions!"));
