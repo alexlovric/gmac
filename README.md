@@ -11,9 +11,9 @@ A fast geometry manipulation and creation library made in rust, with a convenien
 
 Here's a demonstration of a plane tail deformed using the Free Form deformer (FFD):
 
-|                   Variation 1                   |                   Variation 2                   |
-|:-----------------------------------------------:|:-----------------------------------------------:|
-| ![Variation 1](assets/plane_tail_variationa1.png) | ![Variation 2](assets/plane_tail_variationa2.png) |
+| Variation 1 | Variation 2 |
+|-------------|-------------|
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/plane_tail_variationa1.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/plane_tail_variationa2.png?raw=true" /> |
 
 <sup>Both plane tail variations were created using the Gmac Free Form deformer (FFD).</sup>
 
@@ -106,9 +106,9 @@ io.write_stl(nodes=box.nodes, cells=box.cells, filename="deformed_box.stl")
 ```
 Here you can see the original control points and mesh, as well as the deformed control points and mesh:
 
-|                   Original control points                   |                   Deformed control points                   |
-|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
-| ![Variation 1](assets/example_1_original_control_pointsb.png) | ![Variation 2](assets/example_1_deformed_control_pointsb.png) |
+| Original control points | Deformed control points |
+|-------------------------|-------------------------|
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original_control_pointsb.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed_control_pointsb.png?raw=true" width="99%"/> |
 
 
 Similarly the Free Form Deformer can be used. This gives more control over the deformation process and can be used for deforming specific parts of the mesh without affecting the rest of the mesh. Starting from the same geometry as before, we can define a design block (the specific region we want to deform) and deform the geometry as follows:
@@ -134,9 +134,9 @@ geometry.nodes = ffd.deform(geometry.nodes, deformed_design_nodes)
 io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")
 ```
 
-|                   Original control points                   |                   Deformed control points                   |
-|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
-| ![Variation 1](assets/example_2_original_control_pointsb.png) | ![Variation 2](assets/example_2_deformed_control_pointsb.png) |
+| Original control points | Deformed control points |
+|-------------------------|-------------------------|
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_2_original_control_pointsb.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_2_deformed_control_pointsb.png?raw=true" width="99%" /> |
 
 # Examples in Rust
 ## Using GMAC to deform a box

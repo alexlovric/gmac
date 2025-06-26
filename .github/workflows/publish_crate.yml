@@ -26,7 +26,6 @@ jobs:
         run: |
           cp README.md gmac_rs/
           cp LICENSE gmac_rs/
-          cp -r assets gmac_rs/
 
       - name: 🔍 Dry run (preview contents)
         working-directory: ./gmac_rs
