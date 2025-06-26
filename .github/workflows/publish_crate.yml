@@ -25,7 +25,7 @@ jobs:
       - name: 📋 Prepare crate (copy shared files)
         run: |
           cp README.md gmac_rs/
-          cp license gmac_rs/LICENSE
+          cp LICENSE gmac_rs/
           cp -r docs gmac_rs/
 
       - name: 🔍 Dry run (preview contents)
