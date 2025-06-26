@@ -1,0 +1,17 @@
+[package]
+name = "gmac"
+description = "Blazingly fast geometry manipulation toolkit."
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[lib]
+name = "gmac"
+path = "src/lib.rs"
+test = true
+doctest = false
+
+[dependencies]
+gmac_core = { path = "gmac_core" }
+gmac_io = { path = "gmac_io" }
+gmac_morph = { path = "gmac_morph" }

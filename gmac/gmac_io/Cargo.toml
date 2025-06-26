@@ -1,0 +1,14 @@
+[package]
+name = "gmac_io"
+description = "File import and export."
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[lib]
+name = "gmac_io"
+path = "src/lib.rs"
+test = true
+doctest = false
+
+[dependencies]

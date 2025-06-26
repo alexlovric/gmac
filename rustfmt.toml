@@ -1,0 +1,4 @@
+max_width = 90
+reorder_imports = false
+# wrap_comments = true
+# comment_width = 90

@@ -1,0 +1,18 @@
+[package]
+name = "gmac_py"
+description = "A python interface to gmac"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[lib]
+name = "gmac"
+crate-type = ["cdylib"]
+test = true
+doctest = false
+
+[dependencies]
+pyo3 = {version="0.20.0", features = ["abi3-py38"]}
+gmac_core = { path = "../gmac/gmac_core" }
+gmac_io = { path = "../gmac/gmac_io" }
+gmac_morph = { path = "../gmac/gmac_morph" }

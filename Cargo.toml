@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = [
+    "gmac",
+    "gmac/gmac_core",
+    "gmac/gmac_io",
+    "gmac/gmac_morph",
+    "gmac_py"
+]
+
+[workspace.package]
+version = "0.0.1"
+authors = ["Aleksander Lovric <alexlovric@gmail.com>"]
+edition = "2021"
