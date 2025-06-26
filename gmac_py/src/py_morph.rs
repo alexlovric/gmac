@@ -98,22 +98,22 @@ impl PyDesignBlock {
 
     #[getter]
     pub fn length(&self) -> [f64; 3] {
-        self.inner.length.clone()
+        self.inner.length
     }
 
     #[getter]
     pub fn centre(&self) -> [f64; 3] {
-        self.inner.centre.clone()
+        self.inner.centre
     }
 
     #[getter]
     pub fn theta(&self) -> [f64; 3] {
-        self.inner.theta.clone()
+        self.inner.theta
     }
 
     #[getter]
     pub fn resolution(&self) -> [usize; 3] {
-        self.inner.resolution.clone()
+        self.inner.resolution
     }
 
     pub fn select_free_design_nodes(
