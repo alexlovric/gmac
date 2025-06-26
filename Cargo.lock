@@ -387,7 +387,7 @@ dependencies = [
 
 [[package]]
 name = "gmac_py"
-version = "0.0.1"
+version = "0.1.5"
 dependencies = [
  "gmac_rs",
  "pyo3",

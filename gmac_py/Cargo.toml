@@ -1,9 +1,15 @@
 [package]
 name = "gmac_py"
-description = "A python interface to gmac"
-version = { workspace = true }
-authors = { workspace = true }
-edition = { workspace = true }
+version = "0.1.5"
+authors = ["Aleksander Lovric <alexlovric@gmail.com>"]
+description = "A python interface to gmac: Geometry Manipulation and Creation"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/alexlovric/gmac"
+documentation = "https://docs.rs/gmac_py"
+readme = "README.md"
+keywords = ["geometry", "morphing", "ffd", "rbf"]
+categories = ["science", "graphics"]
 
 [lib]
 name = "gmac"

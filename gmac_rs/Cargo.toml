@@ -11,8 +11,6 @@ readme = "README.md"
 keywords = ["geometry", "morphing", "ffd", "rbf"]
 categories = ["science", "graphics"]
 
-include = ["src/**", "Cargo.toml", "README.md", "LICENSE", "assets/**"]
-
 [lib]
 name = "gmac"
 path = "src/lib.rs"
