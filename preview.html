@@ -1,0 +1,173 @@
+<h1>GMAC</h1>
+<p><a href="https://github.com/alexlovric/gmac/actions/workflows/build&amp;test.yml"><img src="https://github.com/alexlovric/gmac/actions/workflows/build&amp;test.yml/badge.svg?branch=main" alt="Build &amp; Test" /></a></p>
+<p>A fast geometry manipulation and creation library made in rust, with a convenient python interface, and very few dependencies. Primary features include:</p>
+<ul>
+<li>Create primitives</li>
+<li>Transform geometries (or selection just a selection of nodes)</li>
+<li>Large range of selection and transformation tools</li>
+<li>Deform geometries using RBF and FFD</li>
+<li>Convenient python interface (gmac_py)</li>
+<li>Fast and memory efficient</li>
+</ul>
+<p>Here's a demonstration of a plane tail deformed using the Free Form deformer (FFD):</p>
+<p>|                   Variation 1                   |                   Variation 2                   |
+|:-----------------------------------------------:|:-----------------------------------------------:|
+| <img src="docs/plane_tail_variationa1.png" alt="Variation 1" /> | <img src="docs/plane_tail_variationa2.png" alt="Variation 2" /> |</p>
+<p><!-- raw HTML omitted -->Both plane tail variations were created using the Gmac Free Form deformer (FFD).<!-- raw HTML omitted --></p>
+<h1>Contributing</h1>
+<h2>Build python from source</h2>
+<p>These instructions assume that Python3 and Cargo are installed on your system. To set up this project, follow these steps:</p>
+<ol>
+<li>Clone the repository:
+<pre style="background-color:#2b303b;"><code class="language-bash"><span style="color:#8fa1b3;">git</span><span style="color:#c0c5ce;"> clone https://github.com/alexlovric/gmac.git
+</span><span style="color:#96b5b4;">cd</span><span style="color:#c0c5ce;"> gmac/gmac_py
+</span></code></pre>
+</li>
+<li>Create a virtual environment and install build system:
+<pre style="background-color:#2b303b;"><code class="language-bash"><span style="color:#8fa1b3;">python3</span><span style="color:#bf616a;"> -m</span><span style="color:#c0c5ce;"> venv .venv
+</span><span style="color:#96b5b4;">source</span><span style="color:#c0c5ce;"> .venv/bin/activate </span><span style="color:#65737e;"># In windows /Scripts/activate
+</span><span style="color:#8fa1b3;">python3</span><span style="color:#bf616a;"> -m</span><span style="color:#c0c5ce;"> pip install</span><span style="color:#bf616a;"> -r</span><span style="color:#c0c5ce;"> requirements.txt
+</span></code></pre>
+</li>
+<li>Build the release binary:
+<pre style="background-color:#2b303b;"><code class="language-bash"><span style="color:#8fa1b3;">maturin</span><span style="color:#c0c5ce;"> develop</span><span style="color:#bf616a;"> --release
+</span></code></pre>
+</li>
+<li>Build the python wheel:
+<pre style="background-color:#2b303b;"><code class="language-bash"><span style="color:#8fa1b3;">maturin</span><span style="color:#c0c5ce;"> build</span><span style="color:#bf616a;"> --release
+</span></code></pre>
+</li>
+</ol>
+<h1>Examples in Python</h1>
+<h2>Using GMAC to deform a box</h2>
+<p>Heres a simple demonstration where we deform a box mesh using <code>RbfDeformer</code> from the gmac_morph library.
+Firstly lets import the required modules and create a box mesh that we intend to deform using the <code>generate_box</code> function:</p>
+<pre style="background-color:#2b303b;"><code class="language-python"><span style="color:#b48ead;">import </span><span style="color:#c0c5ce;">gmac
+</span><span style="color:#b48ead;">import </span><span style="color:#c0c5ce;">gmac.morph </span><span style="color:#b48ead;">as </span><span style="color:#c0c5ce;">morph
+</span><span style="color:#b48ead;">import </span><span style="color:#c0c5ce;">gmac.io </span><span style="color:#b48ead;">as </span><span style="color:#c0c5ce;">io
+</span><span style="color:#b48ead;">import </span><span style="color:#c0c5ce;">numpy </span><span style="color:#b48ead;">as </span><span style="color:#c0c5ce;">np
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">box = gmac.</span><span style="color:#8fa1b3;">generate_box</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">length</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">], </span><span style="color:#bf616a;">centre</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], </span><span style="color:#bf616a;">resolution</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">5</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">5</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">5</span><span style="color:#c0c5ce;">]
+</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">io.</span><span style="color:#8fa1b3;">write_stl</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">nodes</span><span style="color:#c0c5ce;">=box.nodes, </span><span style="color:#bf616a;">cells</span><span style="color:#c0c5ce;">=box.cells, </span><span style="color:#bf616a;">filename</span><span style="color:#c0c5ce;">=&quot;</span><span style="color:#a3be8c;">original_box.stl</span><span style="color:#c0c5ce;">&quot;)
+</span></code></pre>
+<p>Now lets define some control points to use in the training of our RBF deformer. We use <code>generate_block_cluster</code> to create a grid of 3D points:</p>
+<pre style="background-color:#2b303b;"><code class="language-python"><span style="color:#c0c5ce;">original_control_points = np.</span><span style="color:#8fa1b3;">array</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">    gmac.</span><span style="color:#8fa1b3;">generate_block_cluster</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">        </span><span style="color:#bf616a;">length</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">], </span><span style="color:#bf616a;">centre</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], </span><span style="color:#bf616a;">resolution</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">]
+</span><span style="color:#c0c5ce;">    )
+</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">io.</span><span style="color:#8fa1b3;">write_vtp</span><span style="color:#c0c5ce;">(original_control_points, &quot;</span><span style="color:#a3be8c;">original_control_points.vtp</span><span style="color:#c0c5ce;">&quot;)
+</span></code></pre>
+<p>Now before we define the deformed control points we want to use as the output training data for our RBF deformer, lets select nodes that we want to change from the original control points. GMAC has various selection tools to allow you to select nodes of the mesh, in this case we utilise <code>select_nodes_in_plane_direction</code> to select the nodes in the direction of a plane:</p>
+<pre style="background-color:#2b303b;"><code class="language-python"><span style="color:#c0c5ce;">target_control_point_ids = gmac.</span><span style="color:#8fa1b3;">select_nodes_in_plane_direction</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">nodes</span><span style="color:#c0c5ce;">=original_control_points, </span><span style="color:#bf616a;">origin</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">0.3</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], </span><span style="color:#bf616a;">normal</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">]
+</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">io.</span><span style="color:#8fa1b3;">write_vtp</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">nodes</span><span style="color:#c0c5ce;">=original_control_points[target_control_point_ids], </span><span style="color:#bf616a;">filename</span><span style="color:#c0c5ce;">=&quot;</span><span style="color:#a3be8c;">target_points.vtp</span><span style="color:#c0c5ce;">&quot;)
+</span></code></pre>
+<p>We will define our deformed control points by transforming the target points of the original control points. To do this we will utilise one of GMACs various transformation tools, in this case <code>transform_points</code>. We define our transformation using a transformation matrix, in this case we will translate, rotate and scale the target points:</p>
+<pre style="background-color:#2b303b;"><code class="language-python"><span style="color:#c0c5ce;">deformed_control_points = original_control_points.</span><span style="color:#8fa1b3;">copy</span><span style="color:#c0c5ce;">()
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">deformed_control_points[target_control_point_ids] = gmac.</span><span style="color:#8fa1b3;">transform_nodes</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">nodes</span><span style="color:#c0c5ce;">=deformed_control_points[target_control_point_ids],
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">transformation_matrix</span><span style="color:#c0c5ce;">=gmac.</span><span style="color:#8fa1b3;">build_transformation_matrix</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">        </span><span style="color:#bf616a;">translation</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">],
+</span><span style="color:#c0c5ce;">        </span><span style="color:#bf616a;">rotation</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">45.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">],
+</span><span style="color:#c0c5ce;">        </span><span style="color:#bf616a;">scaling</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.75</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.75</span><span style="color:#c0c5ce;">],
+</span><span style="color:#c0c5ce;">    ),
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">origin</span><span style="color:#c0c5ce;">=[</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">],
+</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">io.</span><span style="color:#8fa1b3;">write_vtp</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">nodes</span><span style="color:#c0c5ce;">=deformed_control_points, </span><span style="color:#bf616a;">filename</span><span style="color:#c0c5ce;">=&quot;</span><span style="color:#a3be8c;">deformed_control_points.vtp</span><span style="color:#c0c5ce;">&quot;)
+</span></code></pre>
+<p>Now we can set up the <code>RbfDeformer</code> using these original and deformed control points as well as some other parameters specific to the the RBF interpolator. Using this deformer we can deform the original box:</p>
+<pre style="background-color:#2b303b;"><code class="language-python"><span style="color:#c0c5ce;">rbf = morph.</span><span style="color:#8fa1b3;">RbfDeformer</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">original_control_points</span><span style="color:#c0c5ce;">=original_control_points,
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">deformed_control_points</span><span style="color:#c0c5ce;">=deformed_control_points,
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">kernel</span><span style="color:#c0c5ce;">=&quot;</span><span style="color:#a3be8c;">gaussian</span><span style="color:#c0c5ce;">&quot;,
+</span><span style="color:#c0c5ce;">    </span><span style="color:#bf616a;">epsilon</span><span style="color:#c0c5ce;">=</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">,
+</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">box.nodes = rbf.</span><span style="color:#8fa1b3;">deform</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">points</span><span style="color:#c0c5ce;">=box.nodes)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">io.</span><span style="color:#8fa1b3;">write_stl</span><span style="color:#c0c5ce;">(</span><span style="color:#bf616a;">nodes</span><span style="color:#c0c5ce;">=box.nodes, </span><span style="color:#bf616a;">cells</span><span style="color:#c0c5ce;">=box.cells, </span><span style="color:#bf616a;">filename</span><span style="color:#c0c5ce;">=&quot;</span><span style="color:#a3be8c;">deformed_box.stl</span><span style="color:#c0c5ce;">&quot;)
+</span></code></pre>
+<p>Here you can see the original control points and mesh, as well as the deformed control points and mesh:</p>
+<p>|                   Original control points                   |                   Deformed control points                   |
+|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
+| <img src="docs/example_1_original_control_pointsb.png" alt="Variation 1" /> | <img src="docs/example_1_deformed_control_pointsb.png" alt="Variation 2" /> |</p>
+<p>Similarly the Free Form Deformer can be used. This gives more control over the deformation process and can be used for deforming specific parts of the mesh without affecting the rest of the mesh. Starting from the same geometry as before, we can define a design block (the specific region we want to deform) and deform the geometry as follows:</p>
+<pre style="background-color:#2b303b;"><code class="language-python"><span style="color:#c0c5ce;">design_block = morph.</span><span style="color:#8fa1b3;">DesignBlock</span><span style="color:#c0c5ce;">([</span><span style="color:#d08770;">0.8</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">0.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">])
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">free_design_ids = design_block.</span><span style="color:#8fa1b3;">select_free_design_nodes</span><span style="color:#c0c5ce;">(geometry, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">transformation_matrix = gmac.</span><span style="color:#8fa1b3;">build_transformation_matrix</span><span style="color:#c0c5ce;">([</span><span style="color:#d08770;">0.25</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">45.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.5</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.5</span><span style="color:#c0c5ce;">])
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">deformed_design_nodes = np.</span><span style="color:#8fa1b3;">array</span><span style="color:#c0c5ce;">(design_block.nodes)
+</span><span style="color:#c0c5ce;">deformed_design_nodes[free_design_ids] = gmac.</span><span style="color:#8fa1b3;">transform_nodes</span><span style="color:#c0c5ce;">(
+</span><span style="color:#c0c5ce;">    deformed_design_nodes[free_design_ids],
+</span><span style="color:#c0c5ce;">    transformation_matrix,
+</span><span style="color:#c0c5ce;">    [</span><span style="color:#d08770;">0.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.</span><span style="color:#c0c5ce;">],
+</span><span style="color:#c0c5ce;">)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">ffd = morph.</span><span style="color:#8fa1b3;">FreeFormDeformer</span><span style="color:#c0c5ce;">(design_block)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">geometry.nodes = ffd.</span><span style="color:#8fa1b3;">deform</span><span style="color:#c0c5ce;">(geometry.nodes, deformed_design_nodes)
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">io.</span><span style="color:#8fa1b3;">write_stl</span><span style="color:#c0c5ce;">(geometry.nodes, geometry.cells, &quot;</span><span style="color:#a3be8c;">deformed_geometry.stl</span><span style="color:#c0c5ce;">&quot;)
+</span></code></pre>
+<p>|                   Original control points                   |                   Deformed control points                   |
+|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
+| <img src="docs/example_2_original_control_pointsb.png" alt="Variation 1" /> | <img src="docs/example_2_deformed_control_pointsb.png" alt="Variation 2" /> |</p>
+<h1>Examples in Rust</h1>
+<h2>Using GMAC to deform a box</h2>
+<p>Using the gmac_morph library a box can be deformed using both RBF and FFD tools. In this case we will demonstrate the FFD process.
+Firstly lets import the modules required and create a box:</p>
+<pre style="background-color:#2b303b;"><code class="language-rust"><span style="color:#b48ead;">use </span><span style="color:#c0c5ce;">gmac_core::primitives::generate_box;
+</span><span style="color:#b48ead;">use </span><span style="color:#c0c5ce;">gmac_morph::{ffd::FreeFormDeformer, design_block::DesignBlock};
+</span><span style="color:#b48ead;">use </span><span style="color:#c0c5ce;">gmac_core::transformation::{build_transformation_matrix, transform_node};
+</span><span style="color:#b48ead;">use </span><span style="color:#c0c5ce;">gmac_io::vtk::{write_vtu, write_vtp};
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span style="color:#c0c5ce;">() {
+</span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let mut</span><span style="color:#c0c5ce;"> geometry =
+</span><span style="color:#c0c5ce;">        </span><span style="color:#96b5b4;">generate_box</span><span style="color:#c0c5ce;">([</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">5</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">5</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">5</span><span style="color:#c0c5ce;">]);
+</span><span style="color:#c0c5ce;">    ...
+</span><span style="color:#c0c5ce;">}
+</span></code></pre>
+<p>Now lets specify the design block that we want to use to map our deformation:</p>
+<pre style="background-color:#2b303b;"><code class="language-rust"><span style="color:#c0c5ce;">    ...
+</span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> design_block =
+</span><span style="color:#c0c5ce;">        DesignBlock::new([</span><span style="color:#d08770;">0.8</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.2</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">0.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">]);
+</span></code></pre>
+<p>We will now deform the design block nodes so that the deformation can be mapped to the box. First we will clone the nodes. Then select the last layer of the nodes and transform it:</p>
+<pre style="background-color:#2b303b;"><code class="language-rust"><span style="color:#c0c5ce;">...
+</span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> free_design_ids = design_block.</span><span style="color:#96b5b4;">select_free_design_nodes</span><span style="color:#c0c5ce;">(&amp;geometry, Some(</span><span style="color:#d08770;">2</span><span style="color:#c0c5ce;">)).</span><span style="color:#96b5b4;">unwrap</span><span style="color:#c0c5ce;">();
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let mut</span><span style="color:#c0c5ce;"> deformed_design_nodes = design_block.nodes.</span><span style="color:#96b5b4;">clone</span><span style="color:#c0c5ce;">();
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> transformation_matrix =
+</span><span style="color:#c0c5ce;">        </span><span style="color:#96b5b4;">build_transformation_matrix</span><span style="color:#c0c5ce;">([</span><span style="color:#d08770;">0.25</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">45.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.0</span><span style="color:#c0c5ce;">], [</span><span style="color:#d08770;">1.0</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.5</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">1.5</span><span style="color:#c0c5ce;">]);
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">    free_design_ids.</span><span style="color:#96b5b4;">iter</span><span style="color:#c0c5ce;">().</span><span style="color:#96b5b4;">for_each</span><span style="color:#c0c5ce;">(|&amp;</span><span style="color:#bf616a;">id</span><span style="color:#c0c5ce;">| {
+</span><span style="color:#c0c5ce;">        </span><span style="color:#96b5b4;">transform_node</span><span style="color:#c0c5ce;">(&amp;</span><span style="color:#b48ead;">mut</span><span style="color:#c0c5ce;"> deformed_design_nodes[id], &amp;transformation_matrix, &amp;[</span><span style="color:#d08770;">0.2</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.</span><span style="color:#c0c5ce;">, </span><span style="color:#d08770;">0.</span><span style="color:#c0c5ce;">])
+</span><span style="color:#c0c5ce;">    });
+</span><span style="color:#c0c5ce;">...
+</span></code></pre>
+<p>Lets create the free form deformer and deform the target nodes:</p>
+<pre style="background-color:#2b303b;"><code class="language-rust"><span style="color:#c0c5ce;">...
+</span><span style="color:#c0c5ce;">    </span><span style="color:#b48ead;">let</span><span style="color:#c0c5ce;"> ffd = FreeFormDeformer::new(design_block);
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">    geometry.nodes = ffd.</span><span style="color:#96b5b4;">deform</span><span style="color:#c0c5ce;">(&amp;target_nodes, &amp;deformed_design_nodes).</span><span style="color:#96b5b4;">unwrap</span><span style="color:#c0c5ce;">();
+</span><span style="color:#c0c5ce;">
+</span><span style="color:#c0c5ce;">    </span><span style="color:#96b5b4;">write_vtu</span><span style="color:#c0c5ce;">(&amp;geometry.nodes, &amp;geometry.cells, Some(&quot;</span><span style="color:#a3be8c;">target/deformed.vtu</span><span style="color:#c0c5ce;">&quot;)).</span><span style="color:#96b5b4;">unwrap</span><span style="color:#c0c5ce;">();
+</span><span style="color:#c0c5ce;">    </span><span style="color:#96b5b4;">write_stl</span><span style="color:#c0c5ce;">(&amp;geometry.nodes, &amp;geometry.cells, Some(&quot;</span><span style="color:#a3be8c;">target/deformed.stl</span><span style="color:#c0c5ce;">&quot;)).</span><span style="color:#96b5b4;">unwrap</span><span style="color:#c0c5ce;">();
+</span><span style="color:#c0c5ce;">...
+</span></code></pre>
+<h3>References</h3>
+<p>The gmac_morph is heavily influenced by PyGEM (https://github.com/mathLab/PyGeM), and the following</p>
+<p>Sieger, Menzel, Botsch. <em>On Shape Deformation Techniques for Simulation-based Design Optimization.</em> SEMA SIMAI Springer Series, 2015.</p>
+<p>Lombardi, Parolini, Quarteroni, Rozza. <em>Numerical Simulation of Sailing Boats: Dynamics, FSI, and Shape Optimization.</em> Springer Optimization and Its Applications, 2012.</p>

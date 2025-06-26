@@ -26,7 +26,7 @@ cargo package --list --allow-dirty
 echo
 read -p "✅ Publish to crates.io? (y/N): " confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
-  cargo publish --allow-dirty
+  cargo publish --dry-run --allow-dirty
 else
   echo "❌ Aborted."
 fi

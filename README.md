@@ -10,10 +10,10 @@ A fast geometry manipulation and creation library made in rust, with a convenien
 - Fast and memory efficient
 
 Here's a demonstration of a plane tail deformed using the Free Form deformer (FFD):
-Variation 1             |  Variation 2
-:-------------------------:|:-------------------------:
-![A](docs/plane_tail_variation1a.png)  |  ![B](docs/plane_tail_variation2a.png)
 
+|                   Variation 1                   |                   Variation 2                   |
+|:-----------------------------------------------:|:-----------------------------------------------:|
+| ![Variation 1](docs/plane_tail_variationa1.png) | ![Variation 2](docs/plane_tail_variationa2.png) |
 
 <sup>Both plane tail variations were created using the Gmac Free Form deformer (FFD).</sup>
 
@@ -106,9 +106,10 @@ io.write_stl(nodes=box.nodes, cells=box.cells, filename="deformed_box.stl")
 ```
 Here you can see the original control points and mesh, as well as the deformed control points and mesh:
 
-Original box             |  Deformed box
-:-------------------------:|:-------------------------:
-![A](docs/example_1_original_control_points.png)  |  ![B](docs/example_1_deformed_control_points.png)
+|                   Original control points                   |                   Deformed control points                   |
+|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
+| ![Variation 1](docs/example_1_original_control_pointsb.png) | ![Variation 2](docs/example_1_deformed_control_pointsb.png) |
+
 
 Similarly the Free Form Deformer can be used. This gives more control over the deformation process and can be used for deforming specific parts of the mesh without affecting the rest of the mesh. Starting from the same geometry as before, we can define a design block (the specific region we want to deform) and deform the geometry as follows:
 
@@ -133,10 +134,9 @@ geometry.nodes = ffd.deform(geometry.nodes, deformed_design_nodes)
 io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")
 ```
 
-Original box             |  Deformed box
-:-------------------------:|:-------------------------:
-![A](docs/example_2_original_control_points.png)  |  ![B](docs/example_2_deformed_control_points.png)
-
+|                   Original control points                   |                   Deformed control points                   |
+|:-----------------------------------------------------------:|:-----------------------------------------------------------:|
+| ![Variation 1](docs/example_2_original_control_pointsb.png) | ![Variation 2](docs/example_2_deformed_control_pointsb.png) |
 
 # Examples in Rust
 ## Using GMAC to deform a box
