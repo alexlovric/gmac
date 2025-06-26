@@ -10,12 +10,12 @@ TEMP_FILES=(
   "gmac_rs/LICENSE"
 )
 TEMP_DIRS=(
-  "gmac_rs/docs"
+  "gmac_rs/assets"
 )
 
 cp README.md gmac_rs/
 cp LICENSE gmac_rs/
-cp -r docs gmac_rs/
+cp -r assets gmac_rs/
 
 # Preview what will be published
 cd gmac_rs

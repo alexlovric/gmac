@@ -395,7 +395,7 @@ dependencies = [
 
 [[package]]
 name = "gmac_rs"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "approx 0.5.1",
  "ndarray",
