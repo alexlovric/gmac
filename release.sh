@@ -20,16 +20,16 @@ cp -r docs gmac_rs/
 # Preview what will be published
 cd gmac_rs
 echo "📦 Previewing crate contents:"
-cargo package --list
+cargo package --list --allow-dirty
 
 # Confirm publish
-# echo
-# read -p "✅ Publish to crates.io? (y/N): " confirm
-# if [[ "$confirm" =~ ^[Yy]$ ]]; then
-#   cargo publish --dry-run
-# else
-#   echo "❌ Aborted."
-# fi
+echo
+read -p "✅ Publish to crates.io? (y/N): " confirm
+if [[ "$confirm" =~ ^[Yy]$ ]]; then
+  cargo publish --dry-run --allow-dirty
+else
+  echo "❌ Aborted."
+fi
 
 # Clean up copied files
 echo "🧹 Cleaning up temporary files..."
