@@ -1,4 +1,4 @@
-use crate::transformation::{build_rotation_matrix, rotate_node};
+use crate::core::transformation::{build_rotation_matrix, rotate_node};
 
 /// Creates a new 3D block of nodes.
 ///

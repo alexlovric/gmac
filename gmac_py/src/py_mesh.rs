@@ -1,12 +1,12 @@
 #![allow(non_local_definitions)]
 use pyo3::prelude::*;
 
-use gmac_core::mesh::{
+use gmac::core::mesh::{
     get_mesh_triangles, get_mesh_cell_normals, Mesh, clip_mesh_from_plane,
     find_mesh_intersections_with_plane,
 };
 
-use gmac_io::{stl::write_stl, vtk::write_vtp};
+use gmac::io::{stl::write_stl, vtk::write_vtp};
 
 /// Mesh
 #[derive(Clone, Debug, Default)]
@@ -96,9 +96,7 @@ impl From<PyMesh> for Mesh {
 impl From<&PyAny> for PyMesh {
     /// Converter to `PyMesh`.
     fn from(mesh: &PyAny) -> Self {
-        if let Ok(mesh) =
-            mesh.extract::<PyMesh>()
-        {
+        if let Ok(mesh) = mesh.extract::<PyMesh>() {
             mesh.clone()
         } else {
             panic!("Unknown mesh!")

@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::{Write, Result, BufReader, BufRead};
 
-use crate::utilities::{f32_to_bytes, i32_to_bytes};
-use crate::base64::encode;
+use crate::io::utilities::{f32_to_bytes, i32_to_bytes};
+use crate::io::base64::encode;
 
 /// Reads a 3D mesh from a VTU (VTK UnstructuredGrid) file.
 ///

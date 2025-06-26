@@ -1,6 +1,6 @@
 use crate::{
-    utilities::{squared_euclidean_distance_3d, euclidean_distance_3d},
-    transformation::{build_rotation_matrix, rotate_node},
+    core::utilities::{squared_euclidean_distance_3d, euclidean_distance_3d},
+    core::transformation::{build_rotation_matrix, rotate_node},
 };
 
 /// Selects the indices of nodes closest to a point.
@@ -209,7 +209,7 @@ pub fn is_node_on_positive_side(
 
 #[cfg(test)]
 mod tests {
-    use crate::{primitives::generate_box, mesh::Mesh};
+    use crate::core::{primitives::generate_box, mesh::Mesh};
     use super::*;
 
     fn new_block() -> Mesh {

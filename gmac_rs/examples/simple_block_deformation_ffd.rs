@@ -1,8 +1,8 @@
-use gmac_core::{primitives::generate_box};
-use gmac_core::transformation::{build_transformation_matrix, transform_node};
-use gmac_io::stl::write_stl;
-use gmac_morph::{ffd::FreeFormDeformer, design_block::DesignBlock};
-use gmac_io::vtk::write_vtu;
+use gmac::core::{primitives::generate_box};
+use gmac::core::transformation::{build_transformation_matrix, transform_node};
+use gmac::io::stl::write_stl;
+use gmac::morph::{ffd::FreeFormDeformer, design_block::DesignBlock};
+use gmac::io::vtk::write_vtu;
 
 fn main() {
     let mut geometry =
@@ -39,5 +39,10 @@ fn main() {
     )
     .unwrap();
 
-    write_stl(&geometry.nodes, &geometry.cells, Some("target/deformed.stl")).unwrap();
+    write_stl(
+        &geometry.nodes,
+        &geometry.cells,
+        Some("target/deformed.stl"),
+    )
+    .unwrap();
 }

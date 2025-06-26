@@ -1,7 +1,7 @@
 #![allow(non_local_definitions)]
 use pyo3::{prelude::*, exceptions::PyValueError};
 
-use gmac_morph::{
+use gmac::morph::{
     design_block::DesignBlock,
     ffd::FreeFormDeformer,
     rbf::{

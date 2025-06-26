@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use crate::py_mesh::PyMesh;
 
-use gmac_core::{
+use gmac::core::{
     primitives::{generate_box, generate_naca_wing},
     clusters::generate_block_cluster,
 };

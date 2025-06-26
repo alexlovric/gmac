@@ -210,18 +210,19 @@ mod tests {
     fn test_thin_plate_spline_kernel() {
         assert_eq!(thin_plate_spline_kernel(0.0, 1.0), 0.0);
         assert_relative_eq!(thin_plate_spline_kernel(1.0, 1.0), 0.0, epsilon = 1e-10);
-        assert_relative_eq!(thin_plate_spline_kernel(2.0, 1.0), 2.0_f64.ln() * 4.0, epsilon = 1e-10);
+        assert_relative_eq!(
+            thin_plate_spline_kernel(2.0, 1.0),
+            2.0_f64.ln() * 4.0,
+            epsilon = 1e-10
+        );
     }
 
     #[test]
     fn test_single_point() {
-        let rbf = RbfDeformer::new(
-            vec![[1.0, 2.0, 3.0]],
-            vec![[2.0, 3.0, 4.0]],
-            None,
-            None,
-        ).unwrap();
-        
+        let rbf =
+            RbfDeformer::new(vec![[1.0, 2.0, 3.0]], vec![[2.0, 3.0, 4.0]], None, None)
+                .unwrap();
+
         // Should return exact deformation for training points
         let result = rbf.deform(&[[1.0, 2.0, 3.0]]).unwrap();
         assert_eq!(result[0], [2.0, 3.0, 4.0]);
@@ -230,13 +231,8 @@ mod tests {
     #[test]
     fn test_identity_deformation() {
         let points = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
-        let rbf = RbfDeformer::new(
-            points.clone(),
-            points.clone(),
-            None,
-            None,
-        ).unwrap();
-        
+        let rbf = RbfDeformer::new(points.clone(), points.clone(), None, None).unwrap();
+
         // Should return exact same points
         let result = rbf.deform(&points).unwrap();
         for (res, pt) in result.iter().zip(points.iter()) {
@@ -250,13 +246,8 @@ mod tests {
     fn test_constant_deformation() {
         let original = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
         let deformed = vec![[10.0, 10.0, 10.0], [10.0, 10.0, 10.0]];
-        let rbf = RbfDeformer::new(
-            original,
-            deformed,
-            None,
-            None,
-        ).unwrap();
-        
+        let rbf = RbfDeformer::new(original, deformed, None, None).unwrap();
+
         // All points should map to [10.0, 10.0, 10.0]
         let result = rbf.deform(&[[2.0, 3.0, 4.0], [5.0, 6.0, 7.0]]).unwrap();
         assert_eq!(result, vec![[10.0, 10.0, 10.0], [10.0, 10.0, 10.0]]);
@@ -269,36 +260,33 @@ mod tests {
             vec![[2.0, 3.0, 2.0], [4.0, 5.0, 3.0]],
             None,
             None,
-        ).unwrap();
+        )
+        .unwrap();
 
         let x_new = vec![[1.5, 2.6, 1.8]];
         let prediction = rbf.deform(&x_new).unwrap();
 
         // Compare the predicted result with the expected result
-        assert_relative_eq!(
-            prediction[0][0], 2.9073001606088247, epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            prediction[0][1], 3.9073001606088247, epsilon = 1e-10
-        );
-        assert_relative_eq!(
-            prediction[0][2], 2.4536500803044126, epsilon = 1e-10
-        );
+        assert_relative_eq!(prediction[0][0], 2.9073001606088247, epsilon = 1e-10);
+        assert_relative_eq!(prediction[0][1], 3.9073001606088247, epsilon = 1e-10);
+        assert_relative_eq!(prediction[0][2], 2.4536500803044126, epsilon = 1e-10);
     }
 
     #[test]
     fn test_different_kernels() {
         let points = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
-        
+
         // Test with each kernel type
-        for kernel in &[gaussian_kernel, multiquadric_kernel, inverse_multi_kernel, thin_plate_spline_kernel] {
-            let rbf = RbfDeformer::new(
-                points.clone(),
-                points.clone(),
-                Some(*kernel),
-                None,
-            ).unwrap();
-            
+        for kernel in &[
+            gaussian_kernel,
+            multiquadric_kernel,
+            inverse_multi_kernel,
+            thin_plate_spline_kernel,
+        ] {
+            let rbf =
+                RbfDeformer::new(points.clone(), points.clone(), Some(*kernel), None)
+                    .unwrap();
+
             let result = rbf.deform(&points).unwrap();
             for (res, pt) in result.iter().zip(points.iter()) {
                 assert_relative_eq!(res[0], pt[0], epsilon = 1e-10);
@@ -316,6 +304,7 @@ mod tests {
             vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
             None,
             None,
-        ).unwrap();
+        )
+        .unwrap();
     }
 }
