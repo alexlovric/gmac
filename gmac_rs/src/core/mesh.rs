@@ -1,4 +1,5 @@
-use crate::core::selection::select_nodes_in_plane_direction;
+use crate::{core::selection::select_nodes_in_plane_direction, io::stl::read_stl_ascii};
+use std::io::Error;
 
 /// Represents a standard 3D mesh.
 /// A `Mesh` consists of nodes representing points in 3D space,
@@ -25,6 +26,18 @@ impl Mesh {
     /// * `cells`: Faces of the mesh.
     pub fn new(nodes: Vec<[f64; 3]>, cells: Vec<[usize; 3]>) -> Self {
         Mesh { nodes, cells }
+    }
+
+    /// Reads a mesh from an ASCII STL file using `read_stl_ascii`.
+    ///
+    /// # Arguments
+    /// * `filename` - Path to the STL file.
+    ///
+    /// # Returns
+    /// Returns a `Mesh` if the file is parsed successfully.
+    pub fn from_stl_ascii(filename: &str) -> Result<Self, Error> {
+        let (nodes, cells) = read_stl_ascii(filename)?;
+        Ok(Mesh::new(nodes, cells))
     }
 
     /// Get nodes that make up cell triangles.

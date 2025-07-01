@@ -1,75 +1,9 @@
 #![allow(non_local_definitions)]
 use pyo3::{prelude::*, exceptions::PyValueError};
 
-use gmac::morph::{
-    design_block::DesignBlock,
-    ffd::FreeFormDeformer,
-    rbf::{
-        gaussian_kernel, inverse_multi_kernel, multiquadric_kernel,
-        thin_plate_spline_kernel, RbfDeformer,
-    },
-};
+use gmac::morph::{design_block::DesignBlock, ffd::FreeFormDeformer, rbf::RbfDeformer};
 
 use crate::py_mesh::PyMesh;
-
-/// Rbf deformer.
-#[pyclass(name = "RbfDeformer")]
-pub struct PyRbfDeformer {
-    pub rbf: RbfDeformer,
-    pub kernel_type: String,
-}
-
-#[pymethods]
-impl PyRbfDeformer {
-    #[new]
-    pub fn new(
-        original_control_points: &PyAny,
-        deformed_control_points: &PyAny,
-        kernel: Option<&str>,
-        epsilon: Option<f64>,
-    ) -> Self {
-        let kernel_type = kernel.unwrap_or("gaussian");
-        let kernel = match kernel_type {
-            "gaussian" => gaussian_kernel,
-            "multiquadric" => multiquadric_kernel,
-            "inverse_multiquadratic" => inverse_multi_kernel,
-            "thin_plate_spline" => thin_plate_spline_kernel,
-            _ => panic!("Kernel not implemented"),
-        };
-
-        PyRbfDeformer {
-            rbf: RbfDeformer::new(
-                original_control_points.extract().unwrap(),
-                deformed_control_points.extract().unwrap(),
-                Some(kernel),
-                epsilon,
-            )
-            .unwrap(),
-            kernel_type: String::from(kernel_type),
-        }
-    }
-
-    fn deform(&self, points: Vec<[f64; 3]>) -> PyResult<Vec<[f64; 3]>> {
-        match self.rbf.deform(&points) {
-            Ok(result) => Ok(result),
-            Err(err_str) => Err(PyValueError::new_err(err_str)),
-        }
-    }
-
-    pub fn __repr__(&self) -> String {
-        format!(
-            "┌{}┐\n│{: <48}│\n╞{}╡\n│{} {: <40}│\n│{} {: <39}│\n└{}┘",
-            "─".repeat(48),
-            "Rbf Model",
-            "═".repeat(48),
-            "Kernel:",
-            self.kernel_type,
-            "Epsilon:",
-            self.rbf.epsilon,
-            "─".repeat(48)
-        )
-    }
-}
 
 #[derive(Clone, Debug)]
 #[pyclass(name = "DesignBlock")]
@@ -178,6 +112,40 @@ impl PyFreeFormDeformer {
         deformed_design_nodes: Vec<[f64; 3]>,
     ) -> PyResult<Vec<[f64; 3]>> {
         match self.ffd.deform(&points, &deformed_design_nodes) {
+            Ok(result) => Ok(result),
+            Err(err_str) => Err(PyValueError::new_err(err_str)),
+        }
+    }
+}
+
+/// Rbf deformer.
+#[pyclass(name = "RbfDeformer")]
+pub struct PyRbfDeformer {
+    pub inner: RbfDeformer,
+}
+
+#[pymethods]
+impl PyRbfDeformer {
+    #[new]
+    pub fn new(
+        original_control_points: &PyAny,
+        deformed_control_points: &PyAny,
+        kernel: Option<&str>,
+        epsilon: Option<f64>,
+    ) -> Self {
+        PyRbfDeformer {
+            inner: RbfDeformer::new(
+                original_control_points.extract().unwrap(),
+                deformed_control_points.extract().unwrap(),
+                Some(kernel.unwrap_or("gaussian")),
+                epsilon,
+            )
+            .unwrap(),
+        }
+    }
+
+    fn deform(&self, points: Vec<[f64; 3]>) -> PyResult<Vec<[f64; 3]>> {
+        match self.inner.deform(&points) {
             Ok(result) => Ok(result),
             Err(err_str) => Err(PyValueError::new_err(err_str)),
         }

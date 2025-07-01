@@ -16,6 +16,21 @@ class Mesh:
         """
         self.nodes = nodes
         self.cells = cells
+    @classmethod
+    def from_stl_ascii(cls, filename: str) -> Mesh:
+        """
+        Instantiate mesh from an stl file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the stl file.
+
+        Returns
+        -------
+        Mesh
+            The mesh.
+        """
     def triangles(self) -> list[list[tuple[float, float, float]]]:
         """
         Get triangles that make up the mesh cells.

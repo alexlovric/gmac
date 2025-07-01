@@ -1,68 +1,86 @@
-use gmac::core::{primitives::generate_box};
-use gmac::core::transformation::{build_transformation_matrix, transform_node};
-use gmac::io::stl::write_stl;
+//! Simple Block Deformation using Free-Form Deformation (FFD)
+//!
+//! This example demonstrates how to use the GMAC library to perform Free-Form Deformation (FFD)
+//! on a simple box geometry. FFD is a technique used to deform solid geometry in a smooth way
+//! by manipulating a grid of control points that enclose the geometry.
+
+use gmac::core::{
+    primitives::generate_box,
+    transformation::{build_transformation_matrix, transform_node},
+};
+use gmac::io::{stl::write_stl, vtk::write_vtu};
 use gmac::morph::{ffd::FreeFormDeformer, design_block::DesignBlock};
-use gmac::io::vtk::write_vtu;
 
-fn main() {
-    // 1. Create a base geometry - a 3D box centered at origin
-    //    Dimensions: 1.0 x 1.0 x 1.0
-    //    Discretization: 5x5x5 points
-    let mut geometry =
-        generate_box([1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [5, 5, 5]);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a simple box geometry with specified dimensions, center, orientation, and resolution
+    let mut geometry = generate_box(
+        [1.0, 1.0, 1.0], // Dimensions (length, width, height)
+        [0.0, 0.0, 0.0], // Center coordinates
+        [0.0, 0.0, 0.0], // Rotation angles (degrees)
+        [5, 5, 5],       // Number of divisions in each direction
+    );
 
-    // 2. Create a control lattice (design block) that will be used to deform the geometry
-    //    The design block is slightly larger than the geometry to ensure full coverage
-    //    Dimensions: 0.8 x 1.2 x 1.2
-    //    Offset from origin: [0.2, 0.0, 0.0]
-    //    Control points: 2x2x2 grid
-    let design_block =
-        DesignBlock::new([0.8, 1.2, 1.2], [0.2, 0.0, 0.0], [0.0, 0.0, 0.0], [2, 2, 2]);
+    // Alternative: Load geometry from an STL file
+    // let mut geometry = Mesh::from_stl_ascii("path_to_stl")?;
 
-    // 3. Select which control points will be free to move during deformation
-    //    The second parameter (Some(2)) specifies the number of layers of control points
-    //    that will be kept fixed at the intersecting boundaries
-    let free_design_ids = design_block
-        .select_free_design_nodes(&geometry, Some(2))
-        .unwrap();
+    // Save the original geometry as an STL file
+    write_stl(
+        &geometry.nodes,
+        &geometry.cells,
+        Some("target/original.stl"),
+    )?;
 
-    // 4. Create a transformation matrix that will be applied to the control points
-    //    - Translation: [0.25, 0.0, 0.0]
-    //    - Rotation: 45 degrees around X-axis
-    //    - Scale: [1.0, 1.5, 1.5]
-    let transform_matrix =
-        build_transformation_matrix([0.25, 0.0, 0.0], [45.0, 0.0, 0.0], [1.0, 1.5, 1.5]);
+    // Create a design block (control lattice) for FFD
+    // The design block defines the control points that will be used to deform the geometry
+    let design_block = DesignBlock::new(
+        [0.8, 1.2, 1.2], // Dimensions of the control lattice
+        [0.2, 0.0, 0.0], // Center offset
+        [0.0, 0.0, 0.0], // Rotation angles (degrees)
+        [2, 2, 2],       // Number of control points in each direction
+    );
 
-    // 5. Create a copy of the original control points to modify
+    // Select which control points will be free to move during deformation
+    // The second parameter (Some(2)) specifies the number of fixed layers of control points at the boundaries
+    let free_design_ids = design_block.select_free_design_nodes(&geometry, Some(2))?;
+
+    // Create a transformation matrix that combines translation, rotation, and scaling
+    let transform_matrix = build_transformation_matrix(
+        [0.25, 0.0, 0.0], // Translation vector (x, y, z)
+        [45.0, 0.0, 0.0], // Rotation angles (degrees) around x, y, z axes
+        [1.0, 1.5, 1.5],  // Scaling factors in x, y, z directions
+    );
+
+    // Create a copy of the original control points to modify
     let mut deformed_design_nodes = design_block.nodes.clone();
 
-    // 6. Apply the transformation to each free control point
+    // Apply the transformation to each free control point
     free_design_ids.iter().for_each(|&id| {
         transform_node(
-            &mut deformed_design_nodes[id],
-            &transform_matrix,
-            &[0.2, 0., 0.],
+            &mut deformed_design_nodes[id], // The control point to transform
+            &transform_matrix,              // The transformation to apply
+            &[0.2, 0., 0.],                 // Pivot point for transformations
         )
     });
 
-    // 7. Create a deformed version of the design block with the transformed control points
+    // Create a Free-Form Deformer with the original design block
     let ffd = FreeFormDeformer::new(design_block);
 
-    // 8. Apply the FFD deformation to the original geometry using the modified control lattice
-    geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes).unwrap();
+    // Apply the deformation to the original geometry using the deformed control points
+    geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;
 
-    // 9. Save the deformed geometry to an STL file or points
+    // Save the deformed geometry as a VTK file for visualization
     write_vtu(
         &geometry.nodes,
         &geometry.cells,
         Some("target/deformed.vtu"),
-    )
-    .unwrap();
+    )?;
 
+    // Save the final deformed geometry as an STL file
     write_stl(
         &geometry.nodes,
         &geometry.cells,
         Some("target/deformed.stl"),
-    )
-    .unwrap();
+    )?;
+
+    Ok(())
 }

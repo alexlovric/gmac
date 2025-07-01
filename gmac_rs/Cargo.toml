@@ -1,6 +1,6 @@
 [package]
 name = "gmac_rs"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Aleksander Lovric <alexlovric@gmail.com>"]
 description = "Blazingly fast geometry manipulation and creation library"
 edition = "2021"
@@ -18,10 +18,13 @@ test = true
 doctest = false
 
 [dependencies]
-ndarray = { version = "0.15.6", default-features = false } # Only necessary for Rbf linear solving
-ndarray-linalg = { version = "0.16", features = [
-    "intel-mkl-static",
-] } # Only necessary for Rbf linear solving
+hologram = { version = "0.1.1", default-features = false }
+
+[features]
+default = []  # No features, but hologram is still always included (without its defaults)
+
+openblas = ["hologram/openblas"]
+intel-mkl = ["hologram/intel-mkl"]
 
 [dev-dependencies]
 approx = "0.5"

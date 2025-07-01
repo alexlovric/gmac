@@ -7,6 +7,7 @@ use gmac::core::mesh::{
 };
 
 use gmac::io::{stl::write_stl, vtk::write_vtp};
+use pyo3::types::PyType;
 
 /// Mesh
 #[derive(Clone, Debug, Default)]
@@ -23,6 +24,14 @@ impl PyMesh {
     #[new]
     pub fn new(nodes: Vec<[f64; 3]>, cells: Vec<[usize; 3]>) -> Self {
         PyMesh { nodes, cells }
+    }
+
+    #[classmethod]
+    pub fn from_stl_ascii(_cls: &PyType, filename: &PyAny) -> PyResult<Self> {
+        let filename: String = filename.extract()?;
+        Mesh::from_stl_ascii(&filename)
+            .map(PyMesh::from)
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e.to_string()))
     }
 
     pub fn triangles(&self) -> PyResult<Vec<[[f64; 3]; 3]>> {

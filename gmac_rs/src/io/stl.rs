@@ -1,5 +1,6 @@
+use std::collections::HashMap;
 use std::fs::File;
-use std::io::{Write, Result};
+use std::io::{BufRead, BufReader, Result, Write};
 
 pub fn write_stl(
     nodes: &[[f64; 3]],
@@ -45,4 +46,51 @@ pub fn write_stl(
     writeln!(file, "endsolid exported_grid")?;
 
     Ok(())
+}
+
+/// Reads an ASCII STL file and extracts triangles as `Vec<[[f64; 3]; 3]>`.
+///
+/// # Arguments
+/// * `filename` - Path to the STL file.
+///
+/// # Returns
+/// A vector of triangles, where each triangle is represented as 3 points `[f64; 3]`.
+pub fn read_stl_ascii(filename: &str) -> Result<(Vec<[f64; 3]>, Vec<[usize; 3]>)> {
+    let file = File::open(filename)?;
+    let reader = BufReader::new(file);
+
+    let mut node_map: HashMap<(u64, u64, u64), usize> = HashMap::new();
+    let mut nodes: Vec<[f64; 3]> = Vec::new();
+    let mut cells: Vec<[usize; 3]> = Vec::new();
+
+    let mut current_triangle = [0usize; 3];
+    let mut vertex_index = 0;
+
+    for line in reader.lines() {
+        let line = line?.trim().to_string();
+        if line.starts_with("vertex") {
+            let parts: Vec<f64> = line
+                .split_whitespace()
+                .skip(1)
+                .filter_map(|s| s.parse::<f64>().ok())
+                .collect();
+            if parts.len() == 3 {
+                let point = [parts[0], parts[1], parts[2]];
+                let key = (point[0].to_bits(), point[1].to_bits(), point[2].to_bits());
+                let idx = *node_map.entry(key).or_insert_with(|| {
+                    let new_idx = nodes.len();
+                    nodes.push(point);
+                    new_idx
+                });
+                current_triangle[vertex_index] = idx;
+                vertex_index += 1;
+                if vertex_index == 3 {
+                    cells.push(current_triangle);
+                    vertex_index = 0;
+                }
+            }
+        }
+    }
+
+    Ok((nodes, cells))
 }

@@ -94,6 +94,7 @@ docs/_build/
 **/*.vtu
 **/*.vtk
 **/*.vtp
+**/*.stl
 
 # Shell scripts
 **/*.sh
