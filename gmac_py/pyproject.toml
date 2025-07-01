@@ -13,9 +13,32 @@ authors = [
 description = "A fast geometry manipulation and creation library written in Rust, wrapped in python"
 requires-python = ">=3.10"
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
     "Programming Language :: Rust",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = [
+    "geometry",
+    "3d",
+    "mesh",
+    "deformation",
+    "morphing",
+    "computational-geometry",
+    "scientific-computing",
+    "cad",
+    "ffd",
+    "rbf",
+    "free-form-deformation",
+    "radial-basis-function",
+    "radial basis function",
 ]
 
 
