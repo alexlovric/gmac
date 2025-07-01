@@ -22,11 +22,6 @@ jobs:
         with:
           toolchain: stable
 
-      - name: 📋 Prepare crate (copy shared files)
-        run: |
-          cp README.md gmac_rs/
-          cp LICENSE gmac_rs/
-
       - name: 🔍 Dry run (preview contents)
         working-directory: ./gmac_rs
         run: cargo package --list --allow-dirty
