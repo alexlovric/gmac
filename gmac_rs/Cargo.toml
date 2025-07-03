@@ -1,6 +1,6 @@
 [package]
 name = "gmac_rs"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Aleksander Lovric <alexlovric@gmail.com>"]
 description = "Blazingly fast geometry manipulation and creation library"
 edition = "2021"

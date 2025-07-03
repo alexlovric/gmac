@@ -1,3 +1,46 @@
+/// Solves a system of linear equations using least squares.
+///
+/// # Arguments
+/// * `mat`: The design matrix.
+/// * `rhs`: A vector of n-dimensional points as the right-hand side.
+///
+/// # Returns
+/// * `Ok(Vec<[f64; 3]>)` if the system is successfully solved.
+/// * `Err(String)` if the system cannot be solved, with an error message.
+#[allow(clippy::needless_range_loop)]
+pub fn least_squares_solver(
+    mat: &[Vec<f64>],
+    rhs: &[Vec<f64>],
+) -> Result<Vec<Vec<f64>>, String> {
+    let mat_rows = mat.len();
+    let mat_cols = mat[0].len();
+    let rhs_dim = rhs[0].len();
+
+    // Calculate A^T A
+    let mut ata = vec![vec![0.0; mat_cols]; mat_cols];
+    for i in 0..mat_cols {
+        for j in 0..mat_cols {
+            for k in 0..mat_rows {
+                ata[i][j] += mat[k][i] * mat[k][j];
+            }
+        }
+    }
+
+    // Calculate A^T b for each dimension
+    let mut atb = vec![vec![0.0; rhs_dim]; mat_cols];
+    for i in 0..mat_cols {
+        for d in 0..rhs_dim {
+            for k in 0..mat_rows {
+                atb[i][d] += mat[k][i] * rhs[k][d];
+            }
+        }
+    }
+
+    let x = lu_linear_solver(&ata, &atb)?;
+
+    Ok(x)
+}
+
 /// Solves a system of linear equations using LU decomposition.
 ///
 /// # Arguments
@@ -48,99 +91,6 @@ pub fn lu_linear_solver(
             x[i][d] = (y[i] - sum) / lu[i][i];
         }
     }
-
-    Ok(x)
-}
-
-/// Solves a system of linear equations using LU decomposition for 3d node systems.
-///
-/// # Arguments
-/// * `mat`: The design matrix.
-/// * `rhs`: A vector of 3-dimensional points as the right-hand side.
-///
-/// # Returns
-/// * `Ok(Vec<<[f64;3]>>)` if the system is successfully solved.
-/// * `Err(String)` if the system cannot be solved, with an error message.
-pub fn lu_linear_solver_3d(
-    mat: &Vec<Vec<f64>>,
-    rhs: &Vec<[f64; 3]>,
-) -> Result<Vec<[f64; 3]>, String> {
-    let mat_rows = mat.len();
-
-    if mat_rows != rhs.len() {
-        return Err(String::from(
-            "Incompatible design matrix and right-hand side sizes!",
-        ));
-    }
-
-    let (lu, p) = lu_decomposition(mat)?;
-
-    // Initialize solution vectors for each dimension
-    let mut x = vec![[0.0; 3]; mat_rows];
-
-    for d in 0..3 {
-        // Solve Ly = Pb for each dimension
-        let mut y = vec![0.0; mat_rows];
-        for i in 0..mat_rows {
-            let mut sum = 0.0;
-            for (j, yy) in y.iter().enumerate().take(i) {
-                sum += lu[i][j] * yy;
-            }
-            y[i] = rhs[p[i]][d] - sum;
-        }
-
-        // Solve Ux = y for each dimension
-        for i in (0..mat_rows).rev() {
-            let mut sum = 0.0;
-            for (j, xx) in x.iter().enumerate().take(mat_rows).skip(i + 1) {
-                sum += lu[i][j] * xx[d];
-            }
-            x[i][d] = (y[i] - sum) / lu[i][i];
-        }
-    }
-
-    Ok(x)
-}
-
-/// Solves a system of linear equations using least squares.
-///
-/// # Arguments
-/// * `mat`: The design matrix.
-/// * `rhs`: A vector of n-dimensional points as the right-hand side.
-///
-/// # Returns
-/// * `Ok(Vec<[f64; 3]>)` if the system is successfully solved.
-/// * `Err(String)` if the system cannot be solved, with an error message.
-#[allow(clippy::needless_range_loop)]
-pub fn least_squares_solver(
-    mat: &[Vec<f64>],
-    rhs: &[Vec<f64>],
-) -> Result<Vec<Vec<f64>>, String> {
-    let mat_rows = mat.len();
-    let mat_cols = mat[0].len();
-    let rhs_dim = rhs[0].len();
-
-    // Calculate A^T A
-    let mut ata = vec![vec![0.0; mat_cols]; mat_cols];
-    for i in 0..mat_cols {
-        for j in 0..mat_cols {
-            for k in 0..mat_rows {
-                ata[i][j] += mat[k][i] * mat[k][j];
-            }
-        }
-    }
-
-    // Calculate A^T b for each dimension
-    let mut atb = vec![vec![0.0; rhs_dim]; mat_cols];
-    for i in 0..mat_cols {
-        for d in 0..rhs_dim {
-            for k in 0..mat_rows {
-                atb[i][d] += mat[k][i] * rhs[k][d];
-            }
-        }
-    }
-
-    let x = lu_linear_solver(&ata, &atb)?;
 
     Ok(x)
 }

@@ -193,7 +193,7 @@ Here you can see the original control points and mesh, as well as the deformed c
 Heres a simple demonstration of using the Free Form Deformer (FFD) to deform a generated box (or an imported STL file).
 
 ```python
-mport gmac
+import gmac
 import gmac.morph as morph
 import gmac.io as io
 import numpy as np
@@ -279,3 +279,7 @@ The gmac_morph is heavily influenced by PyGEM (https://github.com/mathLab/PyGeM)
 Sieger, Menzel, Botsch. *On Shape Deformation Techniques for Simulation-based Design Optimization.* SEMA SIMAI Springer Series, 2015.
 
 Lombardi, Parolini, Quarteroni, Rozza. *Numerical Simulation of Sailing Boats: Dynamics, FSI, and Shape Optimization.* Springer Optimization and Its Applications, 2012.
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
