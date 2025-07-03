@@ -8,7 +8,7 @@ A fast geometry manipulation and creation library made in rust, with a convenien
 - Transform geometries (or selection just a selection of nodes)
 - Large range of selection and transformation tools
 - Convenient python interface (gmac_py)
-- Import/export vtk-type files and stl files (ASCII only currently)
+- Import/export vtk-type files and stl files
 
 Here's a demonstration of a plane tail deformed using the Free Form deformer (FFD):
 
@@ -40,12 +40,14 @@ Make sure you have the required dependencies installed for the features you choo
 Heres a demonstration of deformation using the `FreeFormDeformer`:
 
 ```rust
-use gmac::core::{
-    primitives::generate_box,
-    transformation::{build_transformation_matrix, transform_node},
+use gmac::{
+    core::{
+        primitives::generate_box,
+        transformation::{build_transformation_matrix, transform_node},
+    },
+    io::{stl::StlFormat, vtk::write_vtu},
+    morph::{ffd::FreeFormDeformer, design_block::DesignBlock},
 };
-use gmac::io::{stl::write_stl, vtk::write_vtu};
-use gmac::morph::{ffd::FreeFormDeformer, design_block::DesignBlock};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a simple box geometry or import one
@@ -57,7 +59,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     
     // Alternative: Load geometry from an STL file
-    // let mut geometry = Mesh::from_stl_ascii("path_to_stl")?;
+    // let mut geometry = Mesh::from_stl("<path_to_stl>")?;
 
     // Create a design block (control lattice) for FFD
     let design_block = DesignBlock::new(
@@ -102,7 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_vtu(&geometry.nodes, &geometry.cells, Some("deformed.vtu"))?;
 
     // Save the final deformed geometry as an STL file
-    write_stl(&geometry.nodes, &geometry.cells, Some("deformed.stl"))?;
+    geometry.write_stl(Some("deformed.stl"), Some(StlFormat::Binary))?;
 
     Ok(())
 }
@@ -121,7 +123,7 @@ use gmac::core::{
     primitives::generate_box, transformation::build_transformation_matrix,
     selection::select_nodes_in_plane_direction,
 };
-use gmac::io::{stl::write_stl, vtk::write_vtp};
+use gmac::io::{stl::StlFormat, vtk::write_vtp};
 use gmac::morph::rbf::RbfDeformer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -174,7 +176,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     geometry.nodes = rbf.deform(&geometry.nodes)?;
 
     // Save the final deformed geometry as an STL file
-    write_stl(&geometry.nodes, &geometry.cells, Some("deformed.stl"))?;
+    geometry.write_stl(Some("deformed.stl"), None)?; // binary default
 
     Ok(())
 }
@@ -207,7 +209,7 @@ geometry = gmac.generate_box(
 )
 
 # Or import one from stl
-# geometry = gmac.Mesh.from_stl_ascii("path_to_stl")
+# geometry = gmac.Mesh.from_stl("path_to_stl")
 
 # Create a design block (control lattice) for FFD
 design_block = morph.DesignBlock(
@@ -244,8 +246,8 @@ ffd = morph.FreeFormDeformer(design_block)
 # Apply the deformation to the original geometry
 geometry.nodes = ffd.deform(geometry.nodes, deformed_design_nodes)
 
-# Save the final deformed geometry as an STL file
-io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")
+# Save the final deformed geometry as an STL file (default binary)
+geometry.write_stl("deformed_geometry.stl") # binary default
 ```
 
 For Radial Basis Function (RBF) deformation, see the RbfDeformer example in examples.
@@ -270,6 +272,13 @@ These instructions assume that Python3 and Cargo are installed on your system. T
 4. Build the python wheel:
     ```bash
     maturin build --release
+    ```
+5. Running examples:
+    ```bash
+    python3 -m pip install <path to wheel (target/wheels/*.whl)>
+    cd examples
+    python3 -m pip install -r requirements.txt
+    python3 *simple_block_deformation_ffd*.py
     ```
 
 ## References

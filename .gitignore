@@ -98,3 +98,6 @@ docs/_build/
 
 # Shell scripts
 **/*.sh
+
+# Tarpaulin report
+**/tarpaulin-report.html

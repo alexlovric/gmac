@@ -4,12 +4,14 @@
 //! on a simple box geometry. FFD is a technique used to deform solid geometry in a smooth way
 //! by manipulating a grid of control points that enclose the geometry.
 
-use gmac::core::{
-    primitives::generate_box,
-    transformation::{build_transformation_matrix, transform_node},
+use gmac::{
+    core::{
+        primitives::generate_box,
+        transformation::{build_transformation_matrix, transform_node},
+    },
+    io::{stl::StlFormat, vtk::write_vtu},
+    morph::{ffd::FreeFormDeformer, design_block::DesignBlock},
 };
-use gmac::io::{stl::write_stl, vtk::write_vtu};
-use gmac::morph::{ffd::FreeFormDeformer, design_block::DesignBlock};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a simple box geometry with specified dimensions, center, orientation, and resolution
@@ -21,14 +23,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Alternative: Load geometry from an STL file
-    // let mut geometry = Mesh::from_stl_ascii("path_to_stl")?;
+    // let mut geometry = Mesh::from_stl("original.stl")?;
 
     // Save the original geometry as an STL file
-    write_stl(
-        &geometry.nodes,
-        &geometry.cells,
-        Some("target/original.stl"),
-    )?;
+    geometry.write_stl(Some("target/original.stl"), Some(StlFormat::Binary))?;
 
     // Create a design block (control lattice) for FFD
     // The design block defines the control points that will be used to deform the geometry
@@ -76,11 +74,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // Save the final deformed geometry as an STL file
-    write_stl(
-        &geometry.nodes,
-        &geometry.cells,
-        Some("target/deformed.stl"),
-    )?;
+
+    geometry.write_stl(Some("target/deformed.stl"), Some(StlFormat::Ascii))?;
+    // or
+    // write_stl(
+    //     &geometry.nodes,
+    //     &geometry.cells,
+    //     Some("target/deformed.stl"),
+    //     None,
+    // )?;
 
     Ok(())
 }

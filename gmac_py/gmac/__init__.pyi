@@ -17,7 +17,7 @@ class Mesh:
         self.nodes = nodes
         self.cells = cells
     @classmethod
-    def from_stl_ascii(cls, filename: str) -> Mesh:
+    def from_stl(cls, filename: str) -> Mesh:
         """
         Instantiate mesh from an stl file.
 
@@ -78,7 +78,7 @@ class Mesh:
         Mesh
             New clipped mesh.
         """
-    def write_stl(self, filename: str | None) -> None:
+    def write_stl(self, filename: str | None, format: str = "binary") -> None:
         """
         Write an stl file from the nodes and cells.
 
@@ -86,6 +86,8 @@ class Mesh:
         ----------
         filename : str | None
             Optional filename. Defaults to mesh.stl
+        format : str
+            Format of the stl file. Defaults to "binary".
         """
     def write_vtp(self, filename: str | None) -> None:
         """

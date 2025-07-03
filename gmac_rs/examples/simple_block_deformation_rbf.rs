@@ -9,12 +9,12 @@ use gmac::core::{
     primitives::generate_box, transformation::build_transformation_matrix,
     selection::select_nodes_in_plane_direction,
 };
-use gmac::io::{stl::write_stl, vtk::write_vtp};
+use gmac::io::{stl::StlFormat, vtk::write_vtp};
 use gmac::morph::rbf::RbfDeformer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a simple box geometry with specified dimensions, center, orientation, and resolution
-    let mut box_geometry = generate_box(
+    let mut geometry = generate_box(
         [1.0, 1.0, 1.0], // Dimensions (length, width, height)
         [0.0, 0.0, 0.0], // Center coordinates
         [0.0, 0.0, 0.0], // Rotation angles (degrees)
@@ -22,14 +22,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Alternative: Load geometry from an STL file
-    // let mut box_geometry = Mesh::from_stl_ascii("path_to_stl")?;
+    // let mut geometry = Mesh::from_stl("path_to_stl")?;
 
     // Save the original geometry as an STL file
-    write_stl(
-        &box_geometry.nodes,
-        &box_geometry.cells,
-        Some("target/original_box.stl"),
-    )?;
+    geometry.write_stl(Some("target/original_box.stl"), None)?;
 
     // Create a set of control points that will be used to drive the deformation
     // These points form a lattice around the geometry
@@ -89,14 +85,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // Apply the RBF deformation to the original box geometry
-    box_geometry.nodes = rbf.deform(&box_geometry.nodes)?;
+    geometry.nodes = rbf.deform(&geometry.nodes)?;
 
     // Save the final deformed geometry as an STL file
-    write_stl(
-        &box_geometry.nodes,
-        &box_geometry.cells,
-        Some("target/deformed_box.stl"),
-    )?;
+    geometry.write_stl(Some("target/deformed_box.stl"), Some(StlFormat::Ascii))?;
 
     Ok(())
 }

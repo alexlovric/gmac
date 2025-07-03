@@ -1,2 +1,1 @@
 numpy
-<path to your gmac whl>

@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use gmac::io::{stl::write_stl, vtk::write_vtp};
+use gmac::io::{stl::write_stl, vtk::write_vtp, stl::StlFormat};
 
 /// Write Ascii stl file
 #[pyfunction(name = "write_stl")]
@@ -8,8 +8,13 @@ pub fn py_write_stl(
     nodes: Vec<[f64; 3]>,
     cells: Vec<[usize; 3]>,
     filename: Option<&str>,
+    format: Option<&str>,
 ) -> PyResult<()> {
-    write_stl(&nodes, &cells, filename).unwrap();
+    let format = Some(match format {
+        Some("ascii") => StlFormat::Ascii,
+        _ => StlFormat::Binary,
+    });
+    write_stl(&nodes, &cells, filename, format).unwrap();
     Ok(())
 }
 

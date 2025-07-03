@@ -1,5 +1,3 @@
-use crate::io::utilities::f32_to_bytes;
-
 /// Character set for Base64 encoding.
 const CHARSET: &[u8; 64] =
     b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -87,31 +85,6 @@ pub fn decode(input: &str) -> Option<Vec<u8>> {
     }
 
     Some(output)
-}
-
-pub fn encode_f32_vec(data: &[f32]) -> String {
-    let mut bytes = Vec::with_capacity(data.len() * 4);
-    for &value in data {
-        bytes.extend_from_slice(&f32_to_bytes(value));
-    }
-    encode(&bytes)
-}
-
-pub fn decode_f32_vec(encoded: &str) -> Option<Vec<f32>> {
-    let bytes = decode(encoded)?;
-    if bytes.len() % 4 != 0 {
-        return None;
-    }
-
-    let floats = bytes
-        .chunks_exact(4)
-        .map(|chunk| {
-            let array = [chunk[0], chunk[1], chunk[2], chunk[3]];
-            f32::from_le_bytes(array)
-        })
-        .collect();
-
-    Some(floats)
 }
 
 #[cfg(test)]

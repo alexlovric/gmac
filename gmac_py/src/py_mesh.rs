@@ -1,4 +1,5 @@
 #![allow(non_local_definitions)]
+use gmac::io::stl::StlFormat;
 use pyo3::prelude::*;
 
 use gmac::core::mesh::{
@@ -27,9 +28,9 @@ impl PyMesh {
     }
 
     #[classmethod]
-    pub fn from_stl_ascii(_cls: &PyType, filename: &PyAny) -> PyResult<Self> {
+    pub fn from_stl(_cls: &PyType, filename: &PyAny) -> PyResult<Self> {
         let filename: String = filename.extract()?;
-        Mesh::from_stl_ascii(&filename)
+        Mesh::from_stl(&filename)
             .map(PyMesh::from)
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e.to_string()))
     }
@@ -63,8 +64,16 @@ impl PyMesh {
         Ok(PyMesh::new(new_nodes, new_cells))
     }
 
-    pub fn write_stl(&self, filename: Option<&str>) -> PyResult<()> {
-        write_stl(&self.nodes, &self.cells, filename).unwrap();
+    pub fn write_stl(
+        &self,
+        filename: Option<&str>,
+        format: Option<&str>,
+    ) -> PyResult<()> {
+        let format = Some(match format {
+            Some("ascii") => StlFormat::Ascii,
+            _ => StlFormat::Binary,
+        });
+        write_stl(&self.nodes, &self.cells, filename, format).unwrap();
         Ok(())
     }
 

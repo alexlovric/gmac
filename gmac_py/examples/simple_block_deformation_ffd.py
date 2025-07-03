@@ -12,14 +12,16 @@ import gmac.io as io
 import numpy as np
 
 # Create a simple box geometry with specified dimensions, center, orientation, and resolution
-# geometry = gmac.generate_box(
-#     [1.0, 1.0, 1.0],  # Dimensions (length, width, height)
-#     [0.0, 0.0, 0.0],  # Center coordinates
-#     [0.0, 0.0, 0.0],  # Rotation angles (degrees)
-#     [5, 5, 5]         # Number of divisions in each direction
-# )
+geometry = gmac.generate_box(
+    [1.0, 1.0, 1.0],  # Dimensions (length, width, height)
+    [0.0, 0.0, 0.0],  # Center coordinates
+    [0.0, 0.0, 0.0],  # Rotation angles (degrees)
+    [5, 5, 5]         # Number of divisions in each direction
+)
 
-geometry = gmac.Mesh.from_stl_ascii("original_box.stl")
+# geometry = gmac.Mesh.from_stl("original_box.stl") # alternative
+
+# geometry.write_stl("original_box.stl", "binary")
 
 # Create a design block (control lattice) for FFD
 # The design block defines the control points that will be used to deform the geometry
@@ -62,4 +64,5 @@ ffd = morph.FreeFormDeformer(design_block)
 geometry.nodes = ffd.deform(geometry.nodes, deformed_design_nodes)
 
 # Save the final deformed geometry as an STL file
-io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")
+geometry.write_stl("deformed_geometry.stl", "ascii")
+# or io.write_stl(geometry.nodes, geometry.cells, "deformed_geometry.stl")

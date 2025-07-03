@@ -19,8 +19,10 @@ box = gmac.generate_box(
     resolution=[5, 5, 5],     # Number of divisions in each direction
 )
 
+# or mesh = gmac.Mesh.from_stl("path_to_stl")
+
 # Save the original box geometry as an STL file for visualization
-io.write_stl(nodes=box.nodes, cells=box.cells, filename="original_box.stl")
+box.write_stl("original_box.stl", "binary")
 
 # Create a set of control points that will be used to drive the deformation
 # These points form a lattice around the geometry
@@ -77,4 +79,5 @@ rbf = morph.RbfDeformer(
 box.nodes = rbf.deform(points=box.nodes)
 
 # Save the final deformed geometry as an STL file
-io.write_stl(nodes=box.nodes, cells=box.cells, filename="deformed_box.stl")
+box.write_stl("deformed_box.stl", "binary")
+# or io.write_stl(nodes=box.nodes, cells=box.cells, filename="deformed_box.stl")
