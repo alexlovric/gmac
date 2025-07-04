@@ -18,11 +18,12 @@ test = true
 doctest = false
 
 [dependencies]
-hologram = { version = "0.1.1", default-features = false }
+hologram = { version = "^0.1.3", default-features = false }
 
 [features]
-default = []  # No features, but hologram is still always included (without its defaults)
+default = ["rayon"]
 
+rayon = ["hologram/rayon"]
 openblas = ["hologram/openblas"]
 intel-mkl = ["hologram/intel-mkl"]
 

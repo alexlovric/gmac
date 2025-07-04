@@ -23,17 +23,24 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gmac = "0.1.6"
+gmac = "0.1.7" # includes rayon by default
 ```
 
-If you want to use RBF with larger datasets, it is recommended to use the `openblas` or `intel-mkl` feature:
+If thats not beefy enough, try the `openblas` or `intel-mkl` feature:
 
 ```toml
 [dependencies]
-gmac = { version = "0.1.6", features = ["intel-mkl"] } # or openblas
+gmac = { version = "0.1.7", features = ["openblas"] } # or intel-mkl
 ```
 
 Make sure you have the required dependencies installed for the features you choose. For openblas openssl is required.
+
+For those who want a lightweight dependency free version:
+
+```toml
+[dependencies]
+gmac = { version = "0.1.7", default-features = false }
+```
 
 ## Examples in Rust
 ### Deforming with Free Form Deformer (FFD)
@@ -292,3 +299,11 @@ Lombardi, Parolini, Quarteroni, Rozza. *Numerical Simulation of Sailing Boats: D
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details.
+
+## Support
+If you'd like to support the project consider:
+- Identifying the features you'd like to see implemented or bugs you'd like to fix and open an issue.
+- Contributing to the code by resolving existing issues, I'm happy to have you.
+- Donating to help me continue development, [Buy Me a Coffee](https://coff.ee/alexlovric)
+
+[![Buy Me a Coffee](https://img.shields.io/badge/-Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://coff.ee/alexlovric)

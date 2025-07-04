@@ -43,4 +43,5 @@ keywords = [
 
 
 [tool.maturin]
+profile = "release"
 features = ["pyo3/extension-module"]
