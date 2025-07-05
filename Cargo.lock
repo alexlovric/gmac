@@ -517,9 +517,9 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hologram"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9650db047346aa02cde5dedc96104d20840e1af6fd740c7e7039f710abb2af6a"
+checksum = "8703d206b3a1550e82a77f720b5518a640018a6b12d8d00f6c579c2614c419f7"
 dependencies = [
  "ndarray",
  "ndarray-linalg",
