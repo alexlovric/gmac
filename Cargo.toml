@@ -3,6 +3,6 @@ resolver = "2"
 members = ["gmac_rs", "gmac_py"]
 
 [workspace.package]
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Aleksander Lovric <alexlovric@gmail.com>"]
 edition = "2021"
