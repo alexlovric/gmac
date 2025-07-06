@@ -104,9 +104,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
-| Original control points | Deformed control points |
+| Original mesh & control points | Deformed mesh & control points |
 |-------------------------|-------------------------|
-| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original_control_points.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed_control_points.png?raw=true" width="99%" /> |
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed.png?raw=true" width="99%" /> |
 
 
 ### Deforming with Radial Basis Functions (RBF)
