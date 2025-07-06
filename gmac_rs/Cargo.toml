@@ -19,11 +19,12 @@ doctest = false
 
 [dependencies]
 hologram = { version = "^0.1.4", default-features = false }
+rayon = { version = "1.10", optional = true }
 
 [features]
 default = ["rayon"]
 
-rayon = ["hologram/rayon"]
+rayon = ["dep:rayon", "hologram/rayon"]
 openblas = ["hologram/openblas"]
 intel-mkl = ["hologram/intel-mkl"]
 

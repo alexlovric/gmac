@@ -1,8 +1,10 @@
 use crate::{
     core::transformation::rotate_nodes,
-    morph::linear_algebra::least_squares_solver,
-    morph::transforms::{apply_affine_transform, apply_bernstein_transform},
-    morph::design_block::DesignBlock,
+    morph::{
+        linear_algebra::least_squares_solver,
+        transforms::{apply_affine_transform, apply_bernstein_transform},
+        design_block::DesignBlock,
+    },
 };
 
 const REFERENCE_COORDINATE_SYSTEM: [[f64; 3]; 4] = [

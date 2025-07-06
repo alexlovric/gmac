@@ -91,6 +91,27 @@ pub fn write_stl_binary(
     cells: &[[usize; 3]],
     filename: Option<&str>,
 ) -> Result<()> {
+    // This closure defines the work to be done for a single triangle.
+    let process_cell = |cell: &[usize; 3]| -> [u8; 50] {
+        let (normal, [p1, p2, p3]) = compute_facet_data(nodes, cell);
+        let mut buffer = [0u8; 50];
+        let mut cursor = 0;
+
+        // Write normal and vertices into the in-memory buffer
+        for f in normal.iter().chain(p1.iter()).chain(p2.iter()).chain(p3.iter()) {
+            let bytes = (*f as f32).to_le_bytes();
+            buffer[cursor..cursor + 4].copy_from_slice(&bytes);
+            cursor += 4;
+        }
+        buffer
+    };
+
+    // Compute all triangle byte data
+    let all_triangle_data: Vec<[u8; 50]> = cells.iter().map(process_cell).collect();
+    // #[cfg(feature = "rayon")]
+    // let all_triangle_data: Vec<[u8; 50]> = cells.par_iter().map(process_cell).collect();
+
+    // Write the final data to the file sequentially
     let mut file = File::create(filename.unwrap_or("mesh.stl"))?;
 
     // 80-byte header
@@ -98,25 +119,13 @@ pub fn write_stl_binary(
     header[..30].copy_from_slice(b"Binary STL generated with GMAC");
     file.write_all(&header)?;
 
+    // Number of triangles
     let num_triangles = cells.len() as u32;
     file.write_all(&num_triangles.to_le_bytes())?;
 
-    for cell in cells {
-        let (normal, [p1, p2, p3]) = compute_facet_data(nodes, cell);
-
-        // Write normal and vertices as little-endian f32
-        for f in normal
-            .iter()
-            .chain(p1.iter())
-            .chain(p2.iter())
-            .chain(p3.iter())
-        {
-            file.write_all(&(*f as f32).to_le_bytes())?;
-        }
-
-        // Attribute byte count (2 bytes)
-        file.write_all(&0u16.to_le_bytes())?;
-    }
+    // Write all pre-computed triangle data
+    let flat_buffer: Vec<u8> = all_triangle_data.into_iter().flatten().collect();
+    file.write_all(&flat_buffer)?;
 
     Ok(())
 }
@@ -156,7 +165,7 @@ fn compute_facet_data(
     // Normalize
     let norm =
         (normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]).sqrt();
-    if norm != 0.0 {
+    if norm > f64::EPSILON {
         normal = [normal[0] / norm, normal[1] / norm, normal[2] / norm];
     }
 

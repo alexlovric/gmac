@@ -3,12 +3,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A fast geometry manipulation and creation library made in rust, with a convenient python interface, and very few dependencies. Primary features include:
-- Create primitives
 - Deform geometries using RBF and FFD
 - Transform geometries (or selection just a selection of nodes)
 - Large range of selection and transformation tools
-- Convenient python interface (gmac_py)
 - Import/export vtk-type files and stl files
+- Convenient python interface (gmac_py)
+- Create primitives
+- Great performance
 
 Here's a demonstration of a plane tail deformed using the Free Form deformer (FFD):
 
@@ -23,24 +24,13 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gmac = "0.1.7" # includes rayon by default
+gmac = "^0.1.8" # includes rayon by default
 ```
 
-If thats not beefy enough, try the `openblas` or `intel-mkl` feature:
+For those who want a lightweight dependency free version use `default-features = false`
 
-```toml
-[dependencies]
-gmac = { version = "0.1.7", features = ["openblas"] } # or intel-mkl
-```
-
+For **Rbf** specifically, if you still need more performance try adding features `openblas` or `intel-mkl`.
 Make sure you have the required dependencies installed for the features you choose. For openblas openssl is required.
-
-For those who want a lightweight dependency free version:
-
-```toml
-[dependencies]
-gmac = { version = "0.1.7", default-features = false }
-```
 
 ## Examples in Rust
 ### Deforming with Free Form Deformer (FFD)
@@ -52,17 +42,17 @@ use gmac::{
         primitives::generate_box,
         transformation::{build_transformation_matrix, transform_node},
     },
-    io::{stl::StlFormat, vtk::write_vtu},
+    io::stl::StlFormat,
     morph::{ffd::FreeFormDeformer, design_block::DesignBlock},
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a simple box geometry or import one
     let mut geometry = generate_box(
-        [1.0, 1.0, 1.0],  // Dimensions (length, width, height)
+        [2.0, 1.0, 1.0],  // Lengths (x, y, z)
         [0.0, 0.0, 0.0],  // Center coordinates
         [0.0, 0.0, 0.0],  // Rotation angles (degrees)
-        [5, 5, 5],        // Number of elements in each direction
+        [12, 12, 12],     // Elements in each direction
     );
     
     // Alternative: Load geometry from an STL file
@@ -70,10 +60,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a design block (control lattice) for FFD
     let design_block = DesignBlock::new(
-        [0.8, 1.2, 1.2],  // Dimensions of the control lattice
+        [1.8, 1.2, 1.2],  // Lengths (x, y, z)
         [0.2, 0.0, 0.0],  // Center offset
         [0.0, 0.0, 0.0],  // Rotation angles (degrees)
-        [2, 2, 2],        // Control points in each direction
+        [3, 2, 2],        // Control points each direction
     );
 
     // Select which control points will be free to move during 
@@ -85,8 +75,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a transformation matrix
     let transform_matrix = build_transformation_matrix(
         [0.25, 0.0, 0.0],   // Translation vector (x, y, z)
-        [45.0, 0.0, 0.0],   // Rotation angles (degrees)
-        [1.0, 1.5, 1.5],    // Scaling factors (x, y, z)
+        [125.0, 0.0, 0.0],  // Rotation angles (degrees)
+        [1.0, 1.25, 1.25],  // Scaling factors (x, y, z)
     );
 
     // Create a copy of the original control points to modify
@@ -101,25 +91,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
     });
 
-    // Create a Free-Form Deformer with the original design block
+    // Create a Free-Form Deformer with original design block
     let ffd = FreeFormDeformer::new(design_block);
 
     // Apply the deformation to the original geometry
     geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;
 
-    // Save the deformed geometry as a VTK file for visualization
-    write_vtu(&geometry.nodes, &geometry.cells, Some("deformed.vtu"))?;
-
-    // Save the final deformed geometry as an STL file
+    // Save the final deformed geometry as an STL/VTK file
     geometry.write_stl(Some("deformed.stl"), Some(StlFormat::Binary))?;
+    // or write_vtu(..)?;
 
     Ok(())
 }
 ```
-
 | Original control points | Deformed control points |
 |-------------------------|-------------------------|
-| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_2_original_control_pointsb.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_2_deformed_control_pointsb.png?raw=true" width="99%" /> |
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original_control_points.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed_control_points.png?raw=true" width="99%" /> |
+
 
 ### Deforming with Radial Basis Functions (RBF)
 Using the `RbfDeformer` is very similar to using the FFD, but instead of using a design block (control lattice), you use a set of control points:
@@ -191,9 +179,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Here you can see the original control points and mesh, as well as the deformed control points and mesh:
 
-| Original control points | Deformed control points |
+| Original mesh & control points | Deformed mesh & control points |
 |-------------------------|-------------------------|
-| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original_control_pointsb.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed_control_pointsb.png?raw=true" width="99%"/> |
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed.png?raw=true" width="99%"/> |
 
 
 ## Examples in Python

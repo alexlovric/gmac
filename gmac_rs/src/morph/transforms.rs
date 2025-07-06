@@ -1,3 +1,6 @@
+#[cfg(feature = "rayon")]
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+
 /// Apply an affine transformation to a set of 3D points.
 ///
 /// # Arguments
@@ -44,57 +47,99 @@ pub fn apply_affine_transform(
 /// * `Result<Vec<[f64; 3]>, String>`: A Result containing either:
 /// A vector of transformed points in the same format as the input (`Ok`)
 /// An error message if something goes wrong (`Err`)
-///
 pub fn apply_bernstein_transform(
     points: &[[f64; 3]],
     deltas: &[[f64; 3]],
     resolution: &[usize; 3],
 ) -> Result<Vec<[f64; 3]>, String> {
     let dimension = [resolution[0] + 1, resolution[1] + 1, resolution[2] + 1];
-    let mut transformed_points = vec![[0.0; 3]; points.len()];
 
-    for point_idx in 0..points.len() {
-        let point = points[point_idx];
-        let mut aux_shift = [0.0; 3]; // This holds sum of shifts for x, y, z
+    // Pre-compute all binomial coefficients once (common logic)
+    let coeffs_x: Vec<f64> = (0..dimension[0])
+        .map(|i| binomial_coefficient(dimension[0] - 1, i))
+        .collect();
+    let coeffs_y: Vec<f64> = (0..dimension[1])
+        .map(|j| binomial_coefficient(dimension[1] - 1, j))
+        .collect();
+    let coeffs_z: Vec<f64> = (0..dimension[2])
+        .map(|k| binomial_coefficient(dimension[2] - 1, k))
+        .collect();
 
-        for i in 0..dimension[0] {
-            // Compute bernstein for x dimension
-            let aux1_x = (1.0 - point[0]).powi((dimension[0] - 1 - i) as i32);
-            let aux2_x = point[0].powi(i as i32);
-            let bernstein_x = binomial_coefficient(dimension[0] - 1, i) * aux1_x * aux2_x;
+    // Process all points using the appropriate iterator
+    #[cfg(feature = "rayon")]
+    let transformed_points: Vec<[f64; 3]> = points
+        .par_iter()
+        .map(|point| {
+            transform_single_point(point, deltas, &dimension, &coeffs_x, &coeffs_y, &coeffs_z)
+        })
+        .collect();
 
-            for j in 0..dimension[1] {
-                // Compute bernstein for y dimension
-                let aux1_y = (1.0 - point[1]).powi((dimension[1] - 1 - j) as i32);
-                let aux2_y = point[1].powi(j as i32);
-                let bernstein_y =
-                    binomial_coefficient(dimension[1] - 1, j) * aux1_y * aux2_y;
+    #[cfg(not(feature = "rayon"))]
+    let transformed_points: Vec<[f64; 3]> = points
+        .iter()
+        .map(|point| {
+            transform_single_point(
+                point, deltas, &dimension, &coeffs_x, &coeffs_y, &coeffs_z,
+            )
+        })
+        .collect();
 
-                for k in 0..dimension[2] {
-                    // Compute bernstein for z dimension
-                    let aux1_z = (1.0 - point[2]).powi((dimension[2] - 1 - k) as i32);
-                    let aux2_z = point[2].powi(k as i32);
-                    let bernstein_z =
-                        binomial_coefficient(dimension[2] - 1, k) * aux1_z * aux2_z;
+    Ok(transformed_points)
+}
 
-                    // Summation step: this is where we sum up the shifts for each dimension
-                    let delta_id = i * dimension[1] * dimension[2] + j * dimension[2] + k;
+/// Helper function containing the core logic to transform a single point.
+fn transform_single_point(
+    point: &[f64; 3],
+    deltas: &[[f64; 3]],
+    dimension: &[usize; 3],
+    coeffs_x: &[f64],
+    coeffs_y: &[f64],
+    coeffs_z: &[f64],
+) -> [f64; 3] {
+    // Pre-compute 1D Bernstein basis values for this point
+    let bernstein_x: Vec<f64> = (0..dimension[0])
+        .map(|i| {
+            let p = point[0];
+            coeffs_x[i] * (1.0 - p).powi((dimension[0] - 1 - i) as i32) * p.powi(i as i32)
+        })
+        .collect();
 
-                    for d in 0..3 {
-                        aux_shift[d] +=
-                            bernstein_x * bernstein_y * bernstein_z * deltas[delta_id][d];
-                    }
-                }
+    let bernstein_y: Vec<f64> = (0..dimension[1])
+        .map(|j| {
+            let p = point[1];
+            coeffs_y[j] * (1.0 - p).powi((dimension[1] - 1 - j) as i32) * p.powi(j as i32)
+        })
+        .collect();
+
+    let bernstein_z: Vec<f64> = (0..dimension[2])
+        .map(|k| {
+            let p = point[2];
+            coeffs_z[k] * (1.0 - p).powi((dimension[2] - 1 - k) as i32) * p.powi(k as i32)
+        })
+        .collect();
+
+    // Perform the summation using the pre-computed values
+    let mut aux_shift = [0.0; 3];
+    for i in 0..dimension[0] {
+        for j in 0..dimension[1] {
+            for k in 0..dimension[2] {
+                let bernstein_prod = bernstein_x[i] * bernstein_y[j] * bernstein_z[k];
+                let delta_id = i * dimension[1] * dimension[2] + j * dimension[2] + k;
+                let delta = deltas[delta_id];
+
+                aux_shift[0] += bernstein_prod * delta[0];
+                aux_shift[1] += bernstein_prod * delta[1];
+                aux_shift[2] += bernstein_prod * delta[2];
             }
-        }
-
-        // Add the shifts to the original point
-        for d in 0..3 {
-            transformed_points[point_idx][d] = point[d] + aux_shift[d];
         }
     }
 
-    Ok(transformed_points)
+    // Add the final shift to the original point
+    [
+        point[0] + aux_shift[0],
+        point[1] + aux_shift[1],
+        point[2] + aux_shift[2],
+    ]
 }
 
 /// Compute the binomial coefficient "n choose k".

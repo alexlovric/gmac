@@ -88,7 +88,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     geometry.nodes = rbf.deform(&geometry.nodes)?;
 
     // Save the final deformed geometry as an STL file
-    geometry.write_stl(Some("target/deformed_box.stl"), Some(StlFormat::Ascii))?;
+    geometry.write_stl(Some("target/deformed_box.stl"), Some(StlFormat::Binary))?;
 
     Ok(())
 }
