@@ -45,29 +45,10 @@ impl DesignBlock {
         theta: [f64; 3],
         resolution: [usize; 3],
     ) -> Self {
-        let nodes = generate_block_cluster(length, centre, theta, resolution);
+        let nodes = generate_block_cluster(length, centre, theta, resolution).unwrap();
 
         // Evaluate scaling factors
         let scaling_factors = [1. / length[0], 1. / length[1], 1. / length[2]];
-        // let mut min_values = [f64::INFINITY; 3];
-        // let mut max_values = [f64::NEG_INFINITY; 3];
-
-        // for point in nodes.iter() {
-        //     for (i, &val) in point.iter().enumerate() {
-        //         if val < min_values[i] {
-        //             min_values[i] = val;
-        //         }
-        //         if val > max_values[i] {
-        //             max_values[i] = val;
-        //         }
-        //     }
-        // }
-
-        // let scaling_factors = [
-        //     1. / (max_values[0] - min_values[0]),
-        //     1. / (max_values[1] - min_values[1]),
-        //     1. / (max_values[2] - min_values[2]),
-        // ];
 
         // Evaluate corner points
         let [cx, cy, cz] = centre;

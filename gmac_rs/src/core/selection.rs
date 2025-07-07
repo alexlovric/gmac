@@ -213,7 +213,7 @@ mod tests {
     use super::*;
 
     fn new_block() -> Mesh {
-        generate_box([1., 1., 1.], [0.5, 0.5, 0.5], [0.0, 0.0, 0.0], [2, 2, 1])
+        generate_box([1., 1., 1.], [0.5, 0.5, 0.5], [0.0, 0.0, 0.0], [2, 2, 1]).unwrap()
     }
 
     #[test]

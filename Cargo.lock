@@ -483,7 +483,7 @@ dependencies = [
 
 [[package]]
 name = "gmac_py"
-version = "0.1.8"
+version = "0.2.0"
 dependencies = [
  "gmac_rs",
  "pyo3",
@@ -491,7 +491,7 @@ dependencies = [
 
 [[package]]
 name = "gmac_rs"
-version = "0.1.8"
+version = "0.2.0"
 dependencies = [
  "approx",
  "hologram",

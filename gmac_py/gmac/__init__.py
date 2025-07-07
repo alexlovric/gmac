@@ -15,8 +15,15 @@ from .gmac import (
     transform_nodes,
     build_transformation_matrix,
     generate_box,
+    generate_capsule,
+    generate_cone,
+    generate_cylinder,
+    generate_icosphere,
     generate_naca_wing,
+    generate_torus,
+    generate_uvsphere,
     generate_block_cluster,
+    generate_sphere_cluster,
 )
 
 

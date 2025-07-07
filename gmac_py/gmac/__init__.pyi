@@ -16,6 +16,7 @@ class Mesh:
         """
         self.nodes = nodes
         self.cells = cells
+
     @classmethod
     def from_stl(cls, filename: str) -> Mesh:
         """
@@ -31,6 +32,7 @@ class Mesh:
         Mesh
             The mesh.
         """
+
     def triangles(self) -> list[list[tuple[float, float, float]]]:
         """
         Get triangles that make up the mesh cells.
@@ -40,10 +42,12 @@ class Mesh:
         list[list[tuple[float, float, float]]]
             Nodes making up the triangles.
         """
+
     def cell_normals(self) -> list[float]:
         """
         Get cell normals for the mesh.
         """
+
     def slice_from_plane(
         self, origin: list[float], normal: list[float]
     ) -> list[list[float]]:
@@ -62,6 +66,7 @@ class Mesh:
         list[list[float]]
             New nodes that interpolate onto slice plane.
         """
+
     def clip_from_plane(self, origin: list[float], normal: list[float]) -> Mesh:
         """
         Get mesh in the direction of a clipping plane.
@@ -78,6 +83,7 @@ class Mesh:
         Mesh
             New clipped mesh.
         """
+
     def write_stl(self, filename: str | None, format: str = "binary") -> None:
         """
         Write an stl file from the nodes and cells.
@@ -89,6 +95,7 @@ class Mesh:
         format : str
             Format of the stl file. Defaults to "binary".
         """
+
     def write_vtp(self, filename: str | None) -> None:
         """
         Write an VTP file from the nodes.
@@ -184,7 +191,7 @@ def select_nodes_in_box(
         The centre of the box.
     theta : list[float]
         The rotation angles of the box.
-        
+
     Returns
     -------
     list[int]
@@ -354,7 +361,7 @@ def generate_box(
     resolution: list[int],
 ) -> Mesh:
     """
-    Generate 3D box mesh shell.
+    Generate 3D box mesh.
 
     Parameters
     ----------
@@ -373,6 +380,139 @@ def generate_box(
         The mesh containing the nodes and cells.
     """
 
+def generate_capsule(
+    radius: float,
+    cylinder_height: float,
+    centre: list[float],
+    sectors: int,
+    stacks: int,
+) -> Mesh:
+    """
+    Generate 3D capsule mesh.
+
+    Parameters
+    ----------
+    radius : float
+        Radius of the capsule.
+    cylinder_height : float
+        Height of the cylinder part of the capsule.
+    centre : list[float]
+        Centre of the capsule.
+    sectors : int
+        Number of sectors in the capsule.
+    stacks : int
+        Number of stacks in the capsule.
+
+    Returns
+    -------
+    Mesh
+        The mesh containing the nodes and cells.
+    """
+
+def generate_cone(
+    radius: float,
+    height: float,
+    centre: list[float],
+    sectors: int,
+) -> Mesh:
+    """
+    Generate 3D cone mesh.
+
+    Parameters
+    ----------
+    radius : float
+        Radius of the cone.
+    height : float
+        Height of the cone.
+    centre : list[float]
+        Centre of the cone.
+    sectors : int
+        Number of sectors in the cone.
+
+    Returns
+    -------
+    Mesh
+        The mesh containing the nodes and cells.
+    """
+
+def generate_icosphere(
+    radius: float,
+    centre: list[float],
+    subdivisions: int,
+) -> Mesh:
+    """
+    Generate 3D icosphere mesh.
+
+    Parameters
+    ----------
+    radius : float
+        Radius of the icosphere.
+    centre : list[float]
+        Centre of the icosphere.
+    subdivisions : int
+        Number of subdivisions in the icosphere.
+
+    Returns
+    -------
+    Mesh
+        The mesh containing the nodes and cells.
+    """
+
+def generate_uvsphere(
+    radius: float,
+    centre: list[float],
+    sectors: int,
+    stacks: int,
+) -> Mesh:
+    """
+    Generate 3D uv sphere mesh.
+
+    Parameters
+    ----------
+    radius : float
+        Radius of the uv sphere.
+    centre : list[float]
+        Centre of the uv sphere.
+    sectors : int
+        Number of sectors in the uv sphere.
+    stacks : int
+        Number of stacks in the uv sphere.
+
+    Returns
+    -------
+    Mesh
+        The mesh containing the nodes and cells.
+    """
+
+def generate_torus(
+    major_radius: float,
+    minor_radius: float,
+    centre: list[float],
+    major_segments: int,
+    minor_segments: int,
+) -> Mesh:
+    """
+    Generate 3D torus mesh.
+
+    Parameters
+    ----------
+    major_radius : float
+        Radius of the torus.
+    minor_radius : float
+        Radius of the tube.
+    centre : list[float]
+        Centre of the torus.
+    major_segments : int
+        Number of major segments in the torus.
+    minor_segments : int
+        Number of minor segments in the torus.
+
+    Returns
+    -------
+    Mesh
+        The mesh containing the nodes and cells.
+    """
+
 def generate_naca_wing(
     maximum_camber: float,
     camber_distance: float,
@@ -381,7 +521,7 @@ def generate_naca_wing(
     wing_span: tuple[float, float],
 ) -> Mesh:
     """
-    Generate a 3D Naca wing mesh shell.
+    Generate a 3D Naca wing mesh.
 
     Parameters
     ----------
@@ -427,4 +567,27 @@ def generate_block_cluster(
     -------
     list[list[float]]
         The nodes making up the block.
+    """
+
+def generate_sphere_cluster(
+    radius: float,
+    centre: list[float],
+    resolution: int,
+) -> list[list[float]]:
+    """
+    Generate 3D node cluster sphere.
+
+    Parameters
+    ----------
+    radius : float
+        Radius of the sphere.
+    centre : list[float]
+        Centre of the sphere.
+    resolution : int
+        Number of cells in the sphere.
+
+    Returns
+    -------
+    list[list[float]]
+        The nodes making up the sphere.
     """

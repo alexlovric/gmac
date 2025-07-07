@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [0.0, 0.0, 0.0], // Center coordinates
         [0.0, 0.0, 0.0], // Rotation angles (degrees)
         [12, 12, 12],    // Number of divisions in each direction
-    );
+    )?;
 
     // Alternative: Load geometry from an STL file
     // let mut geometry = Mesh::from_stl("original.stl")?;

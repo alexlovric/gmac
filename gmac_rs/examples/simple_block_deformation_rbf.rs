@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [0.0, 0.0, 0.0], // Center coordinates
         [0.0, 0.0, 0.0], // Rotation angles (degrees)
         [5, 5, 5],       // Number of divisions in each direction
-    );
+    )?;
 
     // Alternative: Load geometry from an STL file
     // let mut geometry = Mesh::from_stl("path_to_stl")?;
@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [0.0, 0.0, 0.0], // Centered at the origin
         [0.0, 0.0, 0.0], // No rotation
         [2, 2, 2],       // 2x2x2 grid of control points
-    );
+    )?;
 
     // Save the original control points for visualization
     write_vtp(
