@@ -4,7 +4,7 @@
 
 A fast mesh manipulation and creation library made in rust, with a convenient python interface, and very few dependencies. Primary features include:
 - Deform meshes using RBF and FFD
-- Transform meshes (or selection just a selection of nodes)
+- Transform meshes (or just a selection of nodes)
 - Large range of selection and transformation tools
 - Import/export stl, obj and vtk-type files
 - Convenient python interface
