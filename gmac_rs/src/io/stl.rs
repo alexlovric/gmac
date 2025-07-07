@@ -356,7 +356,7 @@ pub fn read_stl_binary_from_buf<R: Read>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
+    use std::fs::{remove_file, read_to_string, metadata};
     use std::path::Path;
 
     // Sample simple mesh: one triangle
@@ -375,10 +375,10 @@ mod tests {
         assert!(result.is_ok());
         assert!(Path::new(filename).exists());
 
-        let content = fs::read_to_string(filename).expect("Failed to read ASCII STL");
+        let content = read_to_string(filename).expect("Failed to read ASCII STL");
         assert!(content.contains("solid"));
         assert!(content.contains("facet normal"));
-        fs::remove_file(filename).unwrap();
+        remove_file(filename).unwrap();
     }
 
     #[test]
@@ -389,11 +389,10 @@ mod tests {
         assert!(result.is_ok());
         assert!(Path::new(filename).exists());
 
-        let metadata = fs::metadata(filename).expect("Failed to get metadata");
+        let metadata = metadata(filename).expect("Failed to get metadata");
         // Binary STL must be larger than minimal ASCII STL length (header + data)
         assert!(metadata.len() > 80);
-
-        fs::remove_file(filename).unwrap();
+        remove_file(filename).unwrap();
     }
 
     #[test]
@@ -405,9 +404,8 @@ mod tests {
         assert!(Path::new(filename).exists());
 
         // Check header for binary STL: file size > 80 (header) + 4 (count) bytes
-        let metadata = fs::metadata(filename).unwrap();
+        let metadata = metadata(filename).unwrap();
         assert!(metadata.len() > 84);
-
-        fs::remove_file(filename).unwrap();
+        remove_file(filename).unwrap();
     }
 }

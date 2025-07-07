@@ -2,12 +2,12 @@
 [![Build & Test](https://github.com/alexlovric/gmac/actions/workflows/build&test.yml/badge.svg?branch=main)](https://github.com/alexlovric/gmac/actions/workflows/build&test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A fast geometry manipulation and creation library made in rust, with a convenient python interface, and very few dependencies. Primary features include:
-- Deform geometries using RBF and FFD
-- Transform geometries (or selection just a selection of nodes)
+A fast mesh manipulation and creation library made in rust, with a convenient python interface, and very few dependencies. Primary features include:
+- Deform meshes using RBF and FFD
+- Transform meshes (or selection just a selection of nodes)
 - Large range of selection and transformation tools
 - Import/export stl, obj and vtk-type files
-- Convenient python interface (gmac_py)
+- Convenient python interface
 - Create primitives
 - Great performance
 
@@ -47,14 +47,14 @@ use gmac::{
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a simple primitive or import something else
-    let mut geometry = generate_box(
+    let mut mesh = generate_box(
         [2.0, 1.0, 1.0],  // Lengths (x, y, z)
         [0.0, 0.0, 0.0],  // Center coordinates
         [0.0, 0.0, 0.0],  // Rotation angles (degrees)
         [12, 12, 12],     // Elements in each direction
     )?;
     
-    // Alternative: geometry = Mesh::from_stl("path_to_stl")? or from_obj
+    // Alternative: mesh = Mesh::from_stl("path_to_stl")? or from_obj
 
     // Create a design block (control lattice) for FFD
     let design_block = DesignBlock::new(
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // deformation, the second parameter specifies the number of 
     // fixed layers of control points at the boundaries
     let free_design_ids = design_block
-        .select_free_design_nodes(&geometry, Some(2))?;
+        .select_free_design_nodes(&mesh, Some(2))?;
 
     // Create a transformation matrix
     let transform_matrix = build_transformation_matrix(
@@ -93,10 +93,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ffd = FreeFormDeformer::new(design_block)?;
 
     // Apply the deformation to the original geometry
-    geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;
+    mesh.nodes = ffd.deform(&mesh.nodes, &deformed_design_nodes)?;
 
     // Save the final deformed geometry as an STL/OBJ/VTK file
-    geometry.write_stl(Some("deformed.stl"), Some(StlFormat::Binary))?;
+    mesh.write_stl(Some("deformed.stl"), Some(StlFormat::Binary))?;
 
     Ok(())
 }
@@ -120,7 +120,7 @@ use gmac::morph::rbf::RbfDeformer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a simple geometry or import one
-    let mut geometry = generate_torus(1.0, 0.3, [0.0, 0.0, 0.0], 64, 64)?;
+    let mut mesh = generate_torus(1.0, 0.3, [0.0, 0.0, 0.0], 64, 64)?;
 
     // Create a set of control points
     let original_control_points = generate_block_cluster(
@@ -165,10 +165,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // Apply the RBF deformation to the original geometry
-    geometry.nodes = rbf.deform(&geometry.nodes)?;
+    mesh.nodes = rbf.deform(&mesh.nodes)?;
 
     // Save the final deformed geometry as an STL/OBJ/VTK file
-    geometry.write_stl(Some("deformed.stl"), None)?;
+    mesh.write_stl(Some("deformed.stl"), None)?;
 
     Ok(())
 }

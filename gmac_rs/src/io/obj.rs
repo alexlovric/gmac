@@ -123,3 +123,112 @@ pub fn read_obj(filename: &str) -> Result<(Vec<[f64; 3]>, Vec<[usize; 3]>)> {
 
     Ok((nodes, cells))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::{remove_file, read_to_string};
+    use std::io::Write;
+
+    // A helper function to create a temporary file for testing.
+    fn create_temp_file(content: &str) -> String {
+        let filename = format!(
+            "temp_{}.obj",
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        );
+        let mut file = File::create(&filename).unwrap();
+        writeln!(file, "{}", content).unwrap();
+        filename
+    }
+
+    #[test]
+    fn test_write_obj_simple() {
+        let nodes = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]];
+        let cells = vec![[0, 1, 2]];
+        let filename = "test_write_simple.obj";
+
+        let result = write_obj(&nodes, &cells, Some(filename));
+        assert!(result.is_ok());
+
+        let content = read_to_string(filename).unwrap();
+        assert!(content.contains("v 1 2 3"));
+        assert!(content.contains("v 4 5 6"));
+        assert!(content.contains("v 7 8 9"));
+        // OBJ is 1-based, so indices are incremented.
+        assert!(content.contains("f 1 2 3"));
+
+        // Clean up the test file.
+        remove_file(filename).unwrap();
+    }
+
+    #[test]
+    fn test_read_obj_simple() {
+        let obj_content = "
+# Test comment
+v 1.0 0.0 0.0
+v 0.0 1.0 0.0
+v 0.0 0.0 1.0
+
+f 1 2 3
+";
+        let filename = create_temp_file(obj_content);
+        let (nodes, cells) = read_obj(&filename).unwrap();
+
+        assert_eq!(nodes.len(), 3);
+        assert_eq!(cells.len(), 1);
+        assert_eq!(nodes[0], [1.0, 0.0, 0.0]);
+        // Remember that read_obj converts from 1-based to 0-based indices.
+        assert_eq!(cells[0], [0, 1, 2]);
+
+        remove_file(filename).unwrap();
+    }
+
+    #[test]
+    fn test_read_obj_complex_faces() {
+        let obj_content = "
+v 1.0 0.0 0.0
+v 0.0 1.0 0.0
+v 0.0 0.0 1.0
+vt 0.0 0.0
+vn 0.0 1.0 0.0
+
+f 1/1/1 2/1/1 3/1/1
+";
+        let filename = create_temp_file(obj_content);
+        let (nodes, cells) = read_obj(&filename).unwrap();
+
+        assert_eq!(nodes.len(), 3);
+        assert_eq!(cells.len(), 1);
+        assert_eq!(cells[0], [0, 1, 2], "Should correctly parse v/vt/vn format");
+
+        remove_file(filename).unwrap();
+    }
+
+    #[test]
+    fn test_read_obj_quad_triangulation() {
+        let obj_content = "
+v 0.0 0.0 0.0
+v 1.0 0.0 0.0
+v 1.0 1.0 0.0
+v 0.0 1.0 0.0
+
+# A single quad face
+f 1 2 3 4
+";
+        let filename = create_temp_file(obj_content);
+        let (_, cells) = read_obj(&filename).unwrap();
+
+        assert_eq!(
+            cells.len(),
+            2,
+            "A quad should be triangulated into two faces"
+        );
+        assert_eq!(cells[0], [0, 1, 2]);
+        assert_eq!(cells[1], [0, 2, 3]);
+
+        remove_file(filename).unwrap();
+    }
+}

@@ -18,8 +18,8 @@ use gmac::{
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start_timer = Instant::now();
 
-    // Create a simple box geometry with specified dimensions, center, orientation, and resolution
-    let mut geometry = generate_box(
+    // Create a simple box geometry
+    let mut mesh = generate_box(
         [2.0, 1.0, 1.0], // Dimensions (length, width, height)
         [0.0, 0.0, 0.0], // Center coordinates
         [0.0, 0.0, 0.0], // Rotation angles (degrees)
@@ -29,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Alternative: Mesh::from_stl("path_to_stl")? or Mesh::from_obj("path_to_obj")?
 
     // Save the original geometry as an STL file
-    geometry.write_stl(Some("target/original.stl"), Some(StlFormat::Binary))?;
+    mesh.write_stl(Some("target/original.stl"), Some(StlFormat::Binary))?;
 
     // Create a design block (control lattice) for FFD
     // The design block defines the control points that will be used to deform the geometry
@@ -44,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Select which control points will be free to move during deformation
     // The second parameter (Some(2)) specifies the number of fixed layers of control points at the boundaries
-    let free_design_ids = design_block.select_free_design_nodes(&geometry, Some(2))?;
+    let free_design_ids = design_block.select_free_design_nodes(&mesh, Some(2))?;
 
     // Create a transformation matrix that combines translation, rotation, and scaling
     let transform_matrix = build_transformation_matrix(
@@ -67,12 +67,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a Free-Form Deformer with the original design block
     let deformation_timer = Instant::now();
+    
     let ffd = FreeFormDeformer::new(design_block)?;
 
     // Apply the deformation to the original geometry using the deformed control points
-    geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;
+    mesh.nodes = ffd.deform(&mesh.nodes, &deformed_design_nodes)?;
+    
     let elapsed = deformation_timer.elapsed();
-
     println!("Deformation took: {}ms", elapsed.as_millis());
 
     write_vtp(
@@ -81,7 +82,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // Save the final deformed geometry as an STL file
-    geometry.write_stl(Some("target/deformed.stl"), Some(StlFormat::Binary))?;
+    mesh.write_stl(Some("target/deformed.stl"), Some(StlFormat::Binary))?;
 
     let elapsed = start_timer.elapsed();
     println!("Total took: {}ms", elapsed.as_millis());

@@ -4,6 +4,8 @@
 //! using Radial Basis Functions (RBF). RBF is a powerful technique for creating smooth
 //! deformations by interpolating the movement of control points throughout the mesh.
 
+use std::time::Instant;
+
 use gmac::core::primitives::generate_torus;
 use gmac::core::{
     clusters::generate_block_cluster, transformation::transform_node,
@@ -14,13 +16,15 @@ use gmac::io::{stl::StlFormat, vtk::write_vtp};
 use gmac::morph::rbf::RbfDeformer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let start_timer = Instant::now();
+
     // Create a simple geometry or import one
-    let mut geometry = generate_torus(1.0, 0.3, [0.0, 0.0, 0.0], 64, 64)?;
+    let mut mesh = generate_torus(1.0, 0.3, [0.0, 0.0, 0.0], 64, 64)?;
 
     // Alternative: Mesh::from_stl("path_to_stl")? or Mesh::from_obj("path_to_obj")?
 
     // Save the original geometry as an STL file
-    geometry.write_stl(Some("target/original_torus.stl"), None)?;
+    mesh.write_stl(Some("target/original_torus.stl"), None)?;
 
     // Create a set of control points that will be used to drive the deformation
     // These points form a lattice around the geometry
@@ -50,8 +54,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Apply transformation to the selected control points
     let transform_matrix = build_transformation_matrix(
         [0.0, 0.0, 0.0],   // Move 1 unit in x-direction
-        [45.0, 20.0, 0.0],  // Rotate 45 degrees around x-axis
-        [1.0, 1.0, 1.0], // Scale y and z dimensions to 75%
+        [45.0, 20.0, 0.0], // Rotate 45 degrees around x-axis
+        [1.0, 1.0, 1.0],   // Scale y and z dimensions to 75%
     );
 
     // Apply the transformation to each selected control point
@@ -72,18 +76,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // Create an RBF deformer with the control point configurations
+    let deformation_timer = Instant::now();
+
     let rbf = RbfDeformer::new(
         original_control_points,
         deformed_control_points,
         Some("thin_plate_spline"), // Type of RBF kernel
-        Some(1.0),        // Shape parameter for the RBF kernel
+        Some(1.0),                 // Shape parameter for the RBF kernel
     )?;
 
+    let elapsed = deformation_timer.elapsed();
+    println!("Deformation took: {}ms", elapsed.as_millis());
+
     // Apply the RBF deformation to the original geometry
-    geometry.nodes = rbf.deform(&geometry.nodes)?;
+    mesh.nodes = rbf.deform(&mesh.nodes)?;
 
     // Save the final deformed geometry as an STL file
-    geometry.write_stl(Some("target/deformed_torus.stl"), Some(StlFormat::Binary))?;
+    mesh.write_stl(Some("target/deformed_torus.stl"), Some(StlFormat::Binary))?;
+
+    let elapsed = start_timer.elapsed();
+    println!("Total took: {}ms", elapsed.as_millis());
 
     Ok(())
 }

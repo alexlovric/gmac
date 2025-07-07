@@ -17,6 +17,7 @@ def write_stl(
     nodes: list[list[float]],
     cells: list[list[int]],
     filename: str | None,
+    format: str = "binary",
 ) -> None:
     """
     Write a ASCII stl file from nodes and cells.
@@ -29,6 +30,8 @@ def write_stl(
         The list of cell indices of connecting nodes.
     filename : str | None
         Optional filename. Defaults to mesh.stl
+    format : str
+        Format of the stl file. Defaults to "binary".
     """
 
 def read_stl(filename: str) -> tuple[list[list[float]], list[list[int]]]:
