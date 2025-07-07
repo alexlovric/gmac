@@ -160,3 +160,82 @@ fn binomial_coefficient(n: usize, k: usize) -> f64 {
     }
     coeff
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const EPSILON: f64 = 1e-9;
+
+    #[test]
+    fn test_affine_identity() {
+        let points = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
+        let identity_matrix = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ];
+        let transformed = apply_affine_transform(&points, &identity_matrix).unwrap();
+        assert_eq!(
+            points, transformed,
+            "Identity matrix should not change points"
+        );
+    }
+
+    #[test]
+    fn test_affine_translation() {
+        let points = vec![[1.0, 2.0, 3.0]];
+        let translation_matrix = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [10.0, -5.0, 2.0, 1.0], // Translate by (10, -5, 2)
+        ];
+        let transformed = apply_affine_transform(&points, &translation_matrix).unwrap();
+        let expected = vec![[11.0, -3.0, 5.0]];
+
+        for i in 0..3 {
+            assert!(
+                (transformed[0][i] - expected[0][i]).abs() < EPSILON,
+                "Translation failed at index {}",
+                i
+            );
+        }
+    }
+
+    #[test]
+    fn test_bernstein_zero_deltas() {
+        let points = vec![[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]];
+        let resolution = [2, 2, 2];
+        let num_deltas = (resolution[0] + 1) * (resolution[1] + 1) * (resolution[2] + 1);
+        let deltas = vec![[0.0, 0.0, 0.0]; num_deltas];
+
+        let transformed =
+            apply_bernstein_transform(&points, &deltas, &resolution).unwrap();
+        assert_eq!(
+            points, transformed,
+            "Zero deltas should result in no change"
+        );
+    }
+
+    #[test]
+    fn test_bernstein_simple_linear() {
+        let resolution = [1, 1, 1];
+        let point = vec![[0.5, 0.5, 0.5]];
+        let num_deltas = 2 * 2 * 2;
+        let deltas = vec![[1.0, 2.0, 3.0]; num_deltas];
+
+        let transformed =
+            apply_bernstein_transform(&point, &deltas, &resolution).unwrap();
+
+        let expected = vec![[0.5 + 1.0, 0.5 + 2.0, 0.5 + 3.0]];
+
+        for i in 0..3 {
+            assert!(
+                (transformed[0][i] - expected[0][i]).abs() < EPSILON,
+                "Linear Bernstein failed at index {}",
+                i
+            );
+        }
+    }
+}

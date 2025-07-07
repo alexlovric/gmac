@@ -272,11 +272,6 @@ impl DesignBlock {
 ///
 /// # Returns
 /// Returns a `Vec<[f64; 3]>` containing four nodes, each represented as `[x, y, z]`.
-///
-/// # Examples
-/// ```
-/// let frame = evaluate_lcs_from_components([1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]);
-/// ```
 pub fn evaluate_lcs_from_components(
     length: [f64; 3],
     centre: [f64; 3],

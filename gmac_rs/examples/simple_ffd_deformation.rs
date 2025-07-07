@@ -26,8 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [12, 12, 12],    // Number of divisions in each direction
     )?;
 
-    // Alternative: Load geometry from an STL file
-    // let mut geometry = Mesh::from_stl("original.stl")?;
+    // Alternative: Mesh::from_stl("path_to_stl")? or Mesh::from_obj("path_to_obj")?
 
     // Save the original geometry as an STL file
     geometry.write_stl(Some("target/original.stl"), Some(StlFormat::Binary))?;
@@ -83,13 +82,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Save the final deformed geometry as an STL file
     geometry.write_stl(Some("target/deformed.stl"), Some(StlFormat::Binary))?;
-    // or
-    // write_stl(
-    //     &geometry.nodes,
-    //     &geometry.cells,
-    //     Some("target/deformed.stl"),
-    //     None,
-    // )?;
 
     let elapsed = start_timer.elapsed();
     println!("Total took: {}ms", elapsed.as_millis());

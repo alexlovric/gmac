@@ -86,6 +86,9 @@ docs/_build/
 # todo
 **/*.todo
 
+# temp
+**/temp
+
 # Perfermonce profiling
 **/*perf.data*
 **/*.perf

@@ -6,7 +6,7 @@ A fast geometry manipulation and creation library made in rust, with a convenien
 - Deform geometries using RBF and FFD
 - Transform geometries (or selection just a selection of nodes)
 - Large range of selection and transformation tools
-- Import/export vtk-type files and stl files
+- Import/export stl, obj and vtk-type files
 - Convenient python interface (gmac_py)
 - Create primitives
 - Great performance
@@ -17,14 +17,13 @@ Here's a demonstration of a plane tail deformed using the Free Form deformer (FF
 |-------------|-------------|
 | <img src="https://github.com/alexlovric/gmac/blob/main/assets/plane_tail_variationa1.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/plane_tail_variationa2.png?raw=true" /> |
 
-<sup>Both plane tail variations were created using the Gmac Free Form deformer (FFD).</sup>
 
 ## Add to your rust project
 Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gmac = "^0.1.8" # includes rayon by default
+gmac = "^0.2.0" # includes rayon by default
 ```
 
 For those who want a lightweight dependency free version use `default-features = false`
@@ -47,16 +46,15 @@ use gmac::{
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a simple box geometry or import one
+    // Create a simple primitive or import something else
     let mut geometry = generate_box(
         [2.0, 1.0, 1.0],  // Lengths (x, y, z)
         [0.0, 0.0, 0.0],  // Center coordinates
         [0.0, 0.0, 0.0],  // Rotation angles (degrees)
         [12, 12, 12],     // Elements in each direction
-    );
+    )?;
     
-    // Alternative: Load geometry from an STL file
-    // let mut geometry = Mesh::from_stl("<path_to_stl>")?;
+    // Alternative: geometry = Mesh::from_stl("path_to_stl")? or from_obj
 
     // Create a design block (control lattice) for FFD
     let design_block = DesignBlock::new(
@@ -64,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [0.2, 0.0, 0.0],  // Center offset
         [0.0, 0.0, 0.0],  // Rotation angles (degrees)
         [3, 2, 2],        // Control points each direction
-    );
+    )?;
 
     // Select which control points will be free to move during 
     // deformation, the second parameter specifies the number of 
@@ -97,9 +95,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Apply the deformation to the original geometry
     geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;
 
-    // Save the final deformed geometry as an STL/VTK file
+    // Save the final deformed geometry as an STL/OBJ/VTK file
     geometry.write_stl(Some("deformed.stl"), Some(StlFormat::Binary))?;
-    // or write_vtu(..)?;
 
     Ok(())
 }
@@ -122,29 +119,29 @@ use gmac::io::{stl::StlFormat, vtk::write_vtp};
 use gmac::morph::rbf::RbfDeformer;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create or import geometry as before ... 
-    
+    // Create a simple geometry or import one
+    let mut geometry = generate_torus(1.0, 0.3, [0.0, 0.0, 0.0], 64, 64)?;
+
     // Create a set of control points
     let original_control_points = generate_block_cluster(
-        [1.2, 1.2, 1.2], // Lengths of block
-        [0.0, 0.0, 0.0], // Center of block
+        [2.8, 1.0, 2.8], // Slightly larger than the original box
+        [0.0, 0.0, 0.0], // Centered at the origin
         [0.0, 0.0, 0.0], // No rotation
-        [2, 2, 2],       // 2x2x2 grid of control points
-    );
+        [3, 3, 3],       // Number of control points in each direction
+    )?;
 
     // Select control points that lie in a plane defined 
-    // by an origin point and normal vector
     let target_control_point_ids = select_nodes_in_plane_direction(
         &original_control_points,
-        [0.3, 0.0, 0.0], // A point in the plane
-        [1.0, 0.0, 0.0], // Normal vector (x-axis here)
+        [0.0, 0.0, 0.0], // A point in the plane
+        [1.0, 0.0, 0.0], // Normal vector (x-axis in this case)
     );
 
     // Apply transformation to the selected control points
     let transform_matrix = build_transformation_matrix(
-        [1.0, 0.0, 0.0],   // Move 1 unit in x-direction
-        [45.0, 0.0, 0.0],  // Rotate 45 degrees around x-axis
-        [1.0, 0.75, 0.75], // Scale y and z dimensions to 75%
+        [0.0, 0.0, 0.0],   
+        [45.0, 20.0, 0.0], 
+        [1.0, 1.0, 1.0],   
     );
 
     // Apply the transformation to each selected control point
@@ -163,15 +160,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rbf = RbfDeformer::new(
         original_control_points,
         deformed_control_points,
-        Some("gaussian"), // Type of RBF kernel
-        Some(1.0),        // Shape parameter for the RBF kernel
+        Some("thin_plate_spline"), // Type of RBF kernel
+        Some(1.0),                 // Shape parameter
     )?;
 
-    // Apply the RBF deformation to the original box geometry
+    // Apply the RBF deformation to the original geometry
     geometry.nodes = rbf.deform(&geometry.nodes)?;
 
-    // Save the final deformed geometry as an STL file
-    geometry.write_stl(Some("deformed.stl"), None)?; // binary default
+    // Save the final deformed geometry as an STL/OBJ/VTK file
+    geometry.write_stl(Some("deformed.stl"), None)?;
 
     Ok(())
 }
@@ -181,7 +178,7 @@ Here you can see the original control points and mesh, as well as the deformed c
 
 | Original mesh & control points | Deformed mesh & control points |
 |-------------------------|-------------------------|
-| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_original.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_1_deformed.png?raw=true" width="99%"/> |
+| <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_2_original.png?raw=true" /> | <img src="https://github.com/alexlovric/gmac/blob/main/assets/example_2_deformed.png?raw=true" width="99%"/> |
 
 
 ## Examples in Python
@@ -273,7 +270,7 @@ These instructions assume that Python3 and Cargo are installed on your system. T
     python3 -m pip install <path to wheel (target/wheels/*.whl)>
     cd examples
     python3 -m pip install -r requirements.txt
-    python3 *simple_block_deformation_ffd*.py
+    python3 *simple_ffd_deformation*.py
     ```
 
 ## References

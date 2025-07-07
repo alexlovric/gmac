@@ -1,4 +1,5 @@
 #![allow(non_local_definitions)]
+use gmac::io::obj::write_obj;
 use gmac::io::stl::StlFormat;
 use pyo3::prelude::*;
 
@@ -31,6 +32,14 @@ impl PyMesh {
     pub fn from_stl(_cls: &PyType, filename: &PyAny) -> PyResult<Self> {
         let filename: String = filename.extract()?;
         Mesh::from_stl(&filename)
+            .map(PyMesh::from)
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e.to_string()))
+    }
+
+    #[classmethod]
+    pub fn from_obj(_cls: &PyType, filename: &PyAny) -> PyResult<Self> {
+        let filename: String = filename.extract()?;
+        Mesh::from_obj(&filename)
             .map(PyMesh::from)
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyIOError, _>(e.to_string()))
     }
@@ -69,11 +78,17 @@ impl PyMesh {
         filename: Option<&str>,
         format: Option<&str>,
     ) -> PyResult<()> {
-        let format = Some(match format {
-            Some("ascii") => StlFormat::Ascii,
+        let format = format.unwrap_or("binary");
+        let format = match format {
+            "ascii" => StlFormat::Ascii,
             _ => StlFormat::Binary,
-        });
-        write_stl(&self.nodes, &self.cells, filename, format).unwrap();
+        };
+        write_stl(&self.nodes, &self.cells, filename, Some(format)).unwrap();
+        Ok(())
+    }
+
+    pub fn write_obj(&self, filename: Option<&str>) -> PyResult<()> {
+        write_obj(&self.nodes, &self.cells, filename).unwrap();
         Ok(())
     }
 

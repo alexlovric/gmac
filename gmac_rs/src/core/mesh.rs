@@ -1,6 +1,9 @@
 use crate::{
     core::selection::select_nodes_in_plane_direction,
-    io::stl::{read_stl, write_stl, StlFormat},
+    io::{
+        obj::{read_obj, write_obj},
+        stl::{read_stl, write_stl, StlFormat},
+    },
 };
 use crate::error::Result;
 
@@ -32,24 +35,33 @@ impl Mesh {
     }
 
     /// Reads a mesh from an ASCII STL file using `read_stl`.
-    ///
-    /// # Arguments
-    /// * `filename` - Path to the STL file.
-    ///
-    /// # Returns
-    /// Returns a `Mesh` if the file is parsed successfully.
+    /// See `read_stl`
     pub fn from_stl(filename: &str) -> Result<Self> {
         let (nodes, cells) = read_stl(filename)?;
         Ok(Mesh::new(nodes, cells))
     }
 
+    /// Reads a mesh from an OBJ file using `read_obj`.
+    /// See `read_obj`
+    pub fn from_obj(filename: &str) -> Result<Self> {
+        let (nodes, cells) = read_obj(filename)?;
+        Ok(Mesh::new(nodes, cells))
+    }
+
+    /// Writes the mesh to an STL file.
+    /// See `write_stl`
     pub fn write_stl(
         &self,
         filename: Option<&str>,
         format: Option<StlFormat>,
     ) -> Result<()> {
-        write_stl(&self.nodes, &self.cells, filename, format)?;
-        Ok(())
+        write_stl(&self.nodes, &self.cells, filename, format)
+    }
+
+    /// Writes the mesh to an OBJ file.
+    /// See `write_obj`
+    pub fn write_obj(&self, filename: Option<&str>) -> Result<()> {
+        write_obj(&self.nodes, &self.cells, filename)
     }
 
     /// Get nodes that make up cell triangles.
@@ -288,6 +300,7 @@ pub fn clip_mesh_from_plane(
 #[cfg(test)]
 mod tests {
     use super::*;
+    const EPSILON: f64 = 1e-9;
 
     #[test]
     fn test_get_triangles() {
@@ -322,5 +335,97 @@ mod tests {
         let expected_normals = vec![[0.0, 0.0, 1.0], [1.0, 0.0, 0.0]];
 
         assert_eq!(normals, expected_normals)
+    }
+
+    #[test]
+    fn test_slice_mesh_with_plane() {
+        // A simple tetrahedron for slicing
+        let nodes = vec![
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.5, 1.0, 0.0],
+            [0.5, 0.5, 1.0],
+        ];
+        let cells = vec![[0, 1, 2], [0, 1, 3], [1, 2, 3], [0, 2, 3]];
+        let mesh = Mesh::new(nodes, cells);
+
+        // A plane that cuts horizontally through the tetrahedron
+        let origin = [0.0, 0.0, 0.5];
+        let normal = [0.0, 0.0, 1.0];
+
+        let intersections = mesh
+            .slice(origin, normal)
+            .expect("Should find intersections");
+
+        // The slice of a tetrahedron is a triangle, which is 3 line segments (6 points).
+        assert_eq!(
+            intersections.len(),
+            6,
+            "Slice should produce 3 line segments"
+        );
+        // All intersection points should have a z-coordinate of 0.5
+        for point in intersections {
+            assert!((point[2] - 0.5).abs() < EPSILON);
+        }
+    }
+
+    #[test]
+    fn test_slice_mesh_no_intersection() {
+        let nodes = vec![[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]];
+        let cells = vec![[0, 1, 2]];
+        let mesh = Mesh::new(nodes, cells);
+
+        // A plane far away from the triangle
+        let origin = [0.0, 0.0, 10.0];
+        let normal = [0.0, 0.0, 1.0];
+
+        let result = mesh.slice(origin, normal);
+        assert!(result.is_none(), "Should not find any intersections");
+    }
+
+    #[test]
+    fn test_clip_mesh_from_plane() {
+        // A 2x1x1 block centered at the origin
+        let nodes = vec![
+            [-1., -0.5, -0.5],
+            [-1., -0.5, 0.5],
+            [-1., 0.5, -0.5],
+            [-1., 0.5, 0.5],
+            [1., -0.5, -0.5],
+            [1., -0.5, 0.5],
+            [1., 0.5, -0.5],
+            [1., 0.5, 0.5],
+        ];
+        let cells = vec![
+            [0, 1, 3],
+            [0, 3, 2],
+            [4, 7, 5],
+            [4, 6, 7],
+            [0, 4, 5],
+            [0, 5, 1],
+            [2, 3, 7],
+            [2, 7, 6],
+            [0, 6, 4],
+            [0, 2, 6],
+            [1, 5, 7],
+            [1, 7, 3],
+        ];
+        let mesh = Mesh::new(nodes, cells);
+
+        // A plane that cuts the block in half at x=0
+        let origin = [0.0, 0.0, 0.0];
+        let normal = [1.0, 0.0, 0.0]; // Keep the +X side
+
+        let new_mesh = mesh.clip(origin, normal);
+
+        // Should keep the 4 nodes on the +X side
+        assert_eq!(new_mesh.nodes.len(), 4);
+        // Those 4 nodes should form a single quad face (2 triangles)
+        assert_eq!(new_mesh.cells.len(), 2);
+
+        // Verify all kept nodes have a positive or zero x-coordinate
+        for node in new_mesh.nodes {
+            assert!(node[0] >= -EPSILON);
+        }
     }
 }

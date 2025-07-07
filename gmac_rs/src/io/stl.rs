@@ -1,8 +1,11 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Read, Seek, SeekFrom, Write};
+use std::io::{BufRead, BufReader, BufWriter, Read, Seek, SeekFrom, Write};
 
 use crate::error::{Result, Error};
+
+#[cfg(feature = "rayon")]
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 /// Enumeration of supported STL file formats.
 ///
@@ -52,26 +55,37 @@ pub fn write_stl_ascii(
     cells: &[[usize; 3]],
     filename: Option<&str>,
 ) -> Result<()> {
-    let mut file = File::create(filename.unwrap_or("mesh.stl"))?;
-    writeln!(file, "solid exported_grid")?;
-
-    for cell in cells {
+    // This closure defines the CPU-intensive work: calculating data and formatting the string.
+    let process_cell = |cell: &[usize; 3]| -> String {
         let (normal, [p1, p2, p3]) = compute_facet_data(nodes, cell);
+        format!(
+            "  facet normal {} {} {}\n    outer loop\n      vertex {} {} {}\n      vertex {} {} {}\n      vertex {} {} {}\n    endloop\n  endfacet",
+            normal[0], normal[1], normal[2],
+            p1[0], p1[1], p1[2],
+            p2[0], p2[1], p2[2],
+            p3[0], p3[1], p3[2]
+        )
+    };
 
-        writeln!(
-            file,
-            "  facet normal {} {} {}",
-            normal[0], normal[1], normal[2]
-        )?;
-        writeln!(file, "    outer loop")?;
-        writeln!(file, "      vertex {} {} {}", p1[0], p1[1], p1[2])?;
-        writeln!(file, "      vertex {} {} {}", p2[0], p2[1], p2[2])?;
-        writeln!(file, "      vertex {} {} {}", p3[0], p3[1], p3[2])?;
-        writeln!(file, "    endloop")?;
-        writeln!(file, "  endfacet")?;
+    // Compute all triangle strings, using the appropriate iterator
+    #[cfg(feature = "rayon")]
+    let facet_strings: Vec<String> = cells.par_iter().map(process_cell).collect();
+
+    #[cfg(not(feature = "rayon"))]
+    let facet_strings: Vec<String> = cells.iter().map(process_cell).collect();
+
+    // Write the collected strings to a buffered writer sequentially
+    let file = File::create(filename.unwrap_or("mesh.stl"))?;
+    let mut writer = BufWriter::new(file);
+
+    writeln!(writer, "solid exported_grid")?;
+
+    for facet_str in facet_strings {
+        writeln!(writer, "{}", facet_str)?;
     }
 
-    writeln!(file, "endsolid exported_grid")?;
+    writeln!(writer, "endsolid exported_grid")?;
+
     Ok(())
 }
 
@@ -114,9 +128,11 @@ pub fn write_stl_binary(
     };
 
     // Compute all triangle byte data
+    #[cfg(feature = "rayon")]
+    let all_triangle_data: Vec<[u8; 50]> = cells.par_iter().map(process_cell).collect();
+
+    #[cfg(not(feature = "rayon"))]
     let all_triangle_data: Vec<[u8; 50]> = cells.iter().map(process_cell).collect();
-    // #[cfg(feature = "rayon")]
-    // let all_triangle_data: Vec<[u8; 50]> = cells.par_iter().map(process_cell).collect();
 
     // Write the final data to the file sequentially
     let mut file = File::create(filename.unwrap_or("mesh.stl"))?;

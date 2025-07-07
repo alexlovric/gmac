@@ -12,10 +12,7 @@ use crate::error::Result;
 /// * `Ok(Vec<Vec<f64>>)`: A Result containing either:
 /// A vector of transformed points (`Ok`)
 /// An error if something goes wrong (`Err`)
-pub fn least_squares_solver(
-    mat: &[Vec<f64>],
-    rhs: &[Vec<f64>],
-) -> Result<Vec<Vec<f64>>> {
+pub fn least_squares_solver(mat: &[Vec<f64>], rhs: &[Vec<f64>]) -> Result<Vec<Vec<f64>>> {
     let mat_rows = mat.len();
     let mat_cols = mat[0].len();
     let rhs_dim = rhs[0].len();
