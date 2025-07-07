@@ -7,6 +7,8 @@ use hologram::{
     Interpolator,
 };
 
+use crate::error::{Error, Result};
+
 /// A Radial Basis Function (RBF) deformer for 3D point transformations.
 ///
 /// This struct implements a deformable model that can smoothly interpolate between
@@ -45,25 +47,13 @@ impl RbfDeformer {
     /// * `epsilon` - Bandwidth parameter for the kernel (optional, defaults to 1.0)
     ///
     /// # Returns
-    /// A new `RbfDeformer` instance or an error string if creation fails.
-    ///
-    /// # Panics
-    /// Panics if `x` and `y` have different lengths.
-    ///
-    /// # Example
-    /// ```
-    /// use gmac::morph::rbf::RbfDeformer;
-    ///
-    /// let x = vec![[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]];
-    /// let y = vec![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]];
-    /// let deformer = RbfDeformer::new(x, y, Some("gaussian"), Some(1.0)).unwrap();
-    /// ```
+    /// A new `RbfDeformer` instance or an error if creation fails.
     pub fn new(
         x: Vec<[f64; 3]>,
         y: Vec<[f64; 3]>,
         kernel_name: Option<&str>,
         epsilon: Option<f64>,
-    ) -> Result<Self, String> {
+    ) -> Result<Self> {
         assert_eq!(x.len(), y.len(), "x and y must have the same length");
 
         let epsilon = epsilon.unwrap_or(1.0);
@@ -74,7 +64,9 @@ impl RbfDeformer {
             "multiquadric" => multiquadric_kernel,
             "inverse_multiquadratic" => inverse_multi_kernel,
             "thin_plate_spline" => thin_plate_spline_kernel,
-            other => return Err(format!("Unsupported kernel: {other}")),
+            other => {
+                return Err(Error::Deformation(format!("Unsupported kernel: {other}")))
+            }
         };
 
         let n = x.len();
@@ -132,7 +124,7 @@ impl RbfDeformer {
             .collect();
 
         let rbf = Rbf::new(normalized_x, normalized_y, Some(kernel), Some(epsilon))
-            .map_err(|e| format!("Failed to create RBF: {e}"))?;
+            .map_err(|e| Error::Deformation(format!("Failed to create RBF: {e}")))?;
 
         Ok(Self {
             x_mean,
@@ -163,7 +155,7 @@ impl RbfDeformer {
     /// let deformed = deformer.deform(&points).unwrap();
     /// assert_eq!(deformed.len(), 2);
     /// ```
-    pub fn deform(&self, points: &[[f64; 3]]) -> Result<Vec<[f64; 3]>, String> {
+    pub fn deform(&self, points: &[[f64; 3]]) -> Result<Vec<[f64; 3]>> {
         let normalized_input: Vec<[f64; 3]> = points
             .iter()
             .map(|p| {
@@ -178,7 +170,7 @@ impl RbfDeformer {
         let normalized_output = self
             .rbf
             .predict(&normalized_input)
-            .map_err(|e| format!("Prediction failed: {e}"))?;
+            .map_err(|e| Error::Deformation(format!("Prediction failed: {e}")))?;
 
         let mut result = vec![[0.0; 3]; points.len()];
         for (i, p) in normalized_output.iter().enumerate() {

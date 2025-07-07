@@ -5,6 +5,7 @@ use crate::{
         transforms::{apply_affine_transform, apply_bernstein_transform},
         design_block::DesignBlock,
     },
+    error::{Error, Result},
 };
 
 const REFERENCE_COORDINATE_SYSTEM: [[f64; 3]; 4] = [
@@ -28,32 +29,27 @@ impl FreeFormDeformer {
     /// Instantiates a new `FreeFormDeformer` instance.
     ///
     /// # Arguments
-    /// * `original_design_block`: A n*3 array containing the original node positions.
-    /// * `deformed_design_block`: A n*3 array containing the deformed node positions.
-    /// * `local_coordinate_system`: A n*3 array containing the local coordinate system to use.
-    ///                              This includes the origin and all 3 principle axes.
+    /// * `original_design_block`: A `DesignBlock` containing the original node positions.
     ///
     /// # Returns
-    /// A new `FreeFormDeformer` instance.
-    pub fn new(original_design_block: DesignBlock) -> Self {
+    /// A new `FreeFormDeformer` instance or an error string if creation fails.
+    pub fn new(original_design_block: DesignBlock) -> Result<Self> {
         // Evaluate affine weights
         let affine_weights_pre = evaluate_affine_weights(
             &original_design_block.local_coordinate_system,
             &REFERENCE_COORDINATE_SYSTEM,
-        )
-        .unwrap();
+        )?;
 
         let affine_weights_post = evaluate_affine_weights(
             &REFERENCE_COORDINATE_SYSTEM,
             &original_design_block.local_coordinate_system,
-        )
-        .unwrap();
+        )?;
 
-        FreeFormDeformer {
+        Ok(FreeFormDeformer {
             original_design_block,
             affine_weights_pre,
             affine_weights_post,
-        }
+        })
     }
 
     /// Deform points based on deltas of the control points.
@@ -63,15 +59,16 @@ impl FreeFormDeformer {
     /// * `deformed_design_nodes`: New nodal positions of design box.
     ///
     /// # Returns
-    /// New points.
+    /// New points or an error string if deformation fails.
     pub fn deform(
         &self,
         points: &[[f64; 3]],
         deformed_design_nodes: &[[f64; 3]],
-    ) -> Result<Vec<[f64; 3]>, String> {
+    ) -> Result<Vec<[f64; 3]>> {
         if self.original_design_block.nodes.len() != deformed_design_nodes.len() {
-            return Err(String::from(
-                "The number of original and deformed design points must match!",
+            return Err(Error::Deformation(
+                "The number of original and deformed design points must match!"
+                    .to_string(),
             ));
         }
 
@@ -157,10 +154,10 @@ impl FreeFormDeformer {
 fn evaluate_affine_weights(
     source_coordinate_system: &[[f64; 3]; 4],
     target_coordinate_system: &[[f64; 3]; 4],
-) -> Result<[[f64; 4]; 4], String> {
+) -> Result<[[f64; 4]; 4]> {
     if source_coordinate_system.len() != target_coordinate_system.len() {
-        return Err(String::from(
-            "source_coordinate_system and target_coordinate_system must be of the same size!",
+        return Err(Error::Deformation(
+            "source_coordinate_system and target_coordinate_system must be of the same size!".to_string(),
         ));
     }
 

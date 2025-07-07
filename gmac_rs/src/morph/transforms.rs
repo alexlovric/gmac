@@ -1,21 +1,22 @@
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
+use crate::error::Result;
+
 /// Apply an affine transformation to a set of 3D points.
 ///
 /// # Arguments
 /// * `points`: A vector of points in 3D space, represented as arrays `[x, y, z]`.
 /// * `affine_weights`: A 4x4 array representing the affine transformation weights.
-/// * `origin`: A 3D array `[x, y, z]` representing the origin of the transformation.
 ///
 /// # Returns
-/// * `Result<Vec<[f64; 3]>, String>`: A Result containing either:
+/// * `Result<Vec<[f64; 3]>>`: A Result containing either:
 /// A vector of transformed points (`Ok`)
-/// An error message if something goes wrong (`Err`)
+/// An error if something goes wrong (`Err`)
 pub fn apply_affine_transform(
     points: &[[f64; 3]],
     affine_weights: &[[f64; 4]; 4],
-) -> Result<Vec<[f64; 3]>, String> {
+) -> Result<Vec<[f64; 3]>> {
     let padded_points = points
         .iter()
         .map(|&[x1, x2, x3]| vec![x1, x2, x3, 1.0])
@@ -51,7 +52,7 @@ pub fn apply_bernstein_transform(
     points: &[[f64; 3]],
     deltas: &[[f64; 3]],
     resolution: &[usize; 3],
-) -> Result<Vec<[f64; 3]>, String> {
+) -> Result<Vec<[f64; 3]>> {
     let dimension = [resolution[0] + 1, resolution[1] + 1, resolution[2] + 1];
 
     // Pre-compute all binomial coefficients once (common logic)

@@ -1,8 +1,9 @@
 use std::fs::File;
-use std::io::{Write, Result, BufReader, BufRead};
+use std::io::{Write, BufReader, BufRead};
 
 use crate::io::utilities::{f32_to_bytes, i32_to_bytes};
 use crate::io::base64::encode;
+use crate::error::{Result};
 
 /// Reads a 3D mesh from a VTU (VTK UnstructuredGrid) file.
 ///
@@ -281,7 +282,7 @@ pub fn write_vtp_binary(nodes: &Vec<[f64; 3]>, filename: Option<&str>) -> Result
 /// # Returns
 /// Returns a `Result` which is `Ok` if the file is successfully written,
 /// or contains an error otherwise.
-fn write_nodes(file: &mut File, nodes: &[[f64; 3]]) -> Result<()> {
+fn write_nodes(file: &mut File, nodes: &[[f64; 3]]) -> std::io::Result<()> {
     writeln!(file, "      <Points>")?;
     writeln!(
         file,
@@ -294,7 +295,7 @@ fn write_nodes(file: &mut File, nodes: &[[f64; 3]]) -> Result<()> {
     writeln!(file, "      </Points>")
 }
 
-fn write_cells(file: &mut File, cells: &Vec<[usize; 3]>) -> Result<()> {
+fn write_cells(file: &mut File, cells: &Vec<[usize; 3]>) -> std::io::Result<()> {
     writeln!(file, "      <Cells>")?;
     writeln!(
         file,

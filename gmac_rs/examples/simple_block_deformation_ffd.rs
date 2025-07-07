@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [0.2, 0.0, 0.0], // Center offset
         [0.0, 0.0, 0.0], // Rotation angles (degrees)
         [3, 2, 2],       // Number of control points in each direction
-    );
+    )?;
 
     write_vtp(&design_block.nodes, Some("target/design_block.vtp"))?;
 
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a Free-Form Deformer with the original design block
     let deformation_timer = Instant::now();
-    let ffd = FreeFormDeformer::new(design_block);
+    let ffd = FreeFormDeformer::new(design_block)?;
 
     // Apply the deformation to the original geometry using the deformed control points
     geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;

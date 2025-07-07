@@ -1,5 +1,7 @@
 use hologram::linear_algebra::lu_linear_solver;
 
+use crate::error::Result;
+
 /// Solves a system of linear equations using least squares.
 ///
 /// # Arguments
@@ -7,13 +9,13 @@ use hologram::linear_algebra::lu_linear_solver;
 /// * `rhs`: A vector of n-dimensional points as the right-hand side.
 ///
 /// # Returns
-/// * `Ok(Vec<[f64; 3]>)` if the system is successfully solved.
-/// * `Err(String)` if the system cannot be solved, with an error message.
-#[allow(clippy::needless_range_loop)]
+/// * `Ok(Vec<Vec<f64>>)`: A Result containing either:
+/// A vector of transformed points (`Ok`)
+/// An error if something goes wrong (`Err`)
 pub fn least_squares_solver(
     mat: &[Vec<f64>],
     rhs: &[Vec<f64>],
-) -> Result<Vec<Vec<f64>>, String> {
+) -> Result<Vec<Vec<f64>>> {
     let mat_rows = mat.len();
     let mat_cols = mat[0].len();
     let rhs_dim = rhs[0].len();

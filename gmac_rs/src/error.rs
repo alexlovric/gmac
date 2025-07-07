@@ -10,6 +10,9 @@ pub enum Error {
     // Core
     MeshGeneration(String),
 
+    // Morph
+    Deformation(String),
+
     // Io
     FileSystem(io::Error),
 }
@@ -19,6 +22,7 @@ impl fmt::Display for Error {
         match self {
             Error::Custom(msg) => write!(f, "🔴 Error: {msg}"),
             Error::MeshGeneration(msg) => write!(f, "🔴 Mesh generation error: {msg}"),
+            Error::Deformation(msg) => write!(f, "🔴 Deformation error: {msg}"),
             Error::FileSystem(err) => write!(f, "🔴 IO error: {err}"),
         }
     }
@@ -32,6 +36,7 @@ impl std::error::Error for Error {
             // These variants don't wrap another error, so they have no source.
             Error::Custom(_) => None,
             Error::MeshGeneration(_) => None,
+            Error::Deformation(_) => None,
             Error::FileSystem(err) => Some(err),
         }
     }

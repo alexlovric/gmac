@@ -5,6 +5,8 @@ use crate::core::{
     selection::select_nodes_in_box,
 };
 
+use crate::error::{Error, Result};
+
 /// `DesignBlock` represents a geometric block in 3D space.
 ///
 /// # Arguments
@@ -44,8 +46,8 @@ impl DesignBlock {
         centre: [f64; 3],
         theta: [f64; 3],
         resolution: [usize; 3],
-    ) -> Self {
-        let nodes = generate_block_cluster(length, centre, theta, resolution).unwrap();
+    ) -> Result<Self> {
+        let nodes = generate_block_cluster(length, centre, theta, resolution)?;
 
         // Evaluate scaling factors
         let scaling_factors = [1. / length[0], 1. / length[1], 1. / length[2]];
@@ -90,7 +92,7 @@ impl DesignBlock {
             result
         };
 
-        DesignBlock {
+        Ok(DesignBlock {
             nodes,
             length,
             centre,
@@ -99,7 +101,7 @@ impl DesignBlock {
             corner_nodes,
             scaling_factors,
             local_coordinate_system: updated_coordinate_system,
-        }
+        })
     }
 
     /// Selects free deformable control nodes by checking intersection with a mesh body.
@@ -114,12 +116,13 @@ impl DesignBlock {
         &self,
         target_mesh: &Mesh,
         fixed_layers: Option<usize>,
-    ) -> Result<Vec<usize>, String> {
+    ) -> Result<Vec<usize>> {
         let fixed_layers = fixed_layers.unwrap_or(2);
 
         if self.resolution.iter().any(|&res| res < fixed_layers) {
-            return Err(String::from(
-                "Block resultion must be at least the size of the fixed layers!",
+            return Err(Error::Deformation(
+                "Block resultion must be at least the size of the fixed layers!"
+                    .to_string(),
             ));
         }
 
@@ -242,7 +245,7 @@ impl DesignBlock {
     pub fn select_mesh_nodes_inside(
         &self,
         target_mesh_nodes: &[[f64; 3]],
-    ) -> Result<Vec<usize>, String> {
+    ) -> Result<Vec<usize>> {
         Ok(select_nodes_in_box(
             target_mesh_nodes,
             self.length,

@@ -2,7 +2,7 @@ use crate::{
     core::selection::select_nodes_in_plane_direction,
     io::stl::{read_stl, write_stl, StlFormat},
 };
-use std::io::Error;
+use crate::error::Result;
 
 /// Represents a standard 3D mesh.
 /// A `Mesh` consists of nodes representing points in 3D space,
@@ -38,7 +38,7 @@ impl Mesh {
     ///
     /// # Returns
     /// Returns a `Mesh` if the file is parsed successfully.
-    pub fn from_stl(filename: &str) -> Result<Self, Error> {
+    pub fn from_stl(filename: &str) -> Result<Self> {
         let (nodes, cells) = read_stl(filename)?;
         Ok(Mesh::new(nodes, cells))
     }
@@ -47,7 +47,7 @@ impl Mesh {
         &self,
         filename: Option<&str>,
         format: Option<StlFormat>,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         write_stl(&self.nodes, &self.cells, filename, format)?;
         Ok(())
     }

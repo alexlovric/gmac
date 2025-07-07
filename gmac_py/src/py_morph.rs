@@ -21,7 +21,7 @@ impl PyDesignBlock {
         resolution: [usize; 3],
     ) -> Self {
         PyDesignBlock {
-            inner: DesignBlock::new(length, centre, theta, resolution),
+            inner: DesignBlock::new(length, centre, theta, resolution).unwrap(),
         }
     }
 
@@ -61,7 +61,7 @@ impl PyDesignBlock {
             .select_free_design_nodes(&mesh.into(), fixed_layers)
         {
             Ok(result) => Ok(result),
-            Err(err_str) => Err(PyValueError::new_err(err_str)),
+            Err(err) => Err(PyValueError::new_err(err.to_string())),
         }
     }
 }
@@ -102,7 +102,7 @@ impl PyFreeFormDeformer {
     pub fn new(original_design_block: &PyAny) -> Self {
         let design_block = original_design_block.extract::<PyDesignBlock>().unwrap();
         PyFreeFormDeformer {
-            ffd: FreeFormDeformer::new(design_block.inner),
+            ffd: FreeFormDeformer::new(design_block.inner).unwrap(),
         }
     }
 
@@ -113,7 +113,7 @@ impl PyFreeFormDeformer {
     ) -> PyResult<Vec<[f64; 3]>> {
         match self.ffd.deform(&points, &deformed_design_nodes) {
             Ok(result) => Ok(result),
-            Err(err_str) => Err(PyValueError::new_err(err_str)),
+            Err(err) => Err(PyValueError::new_err(err.to_string())),
         }
     }
 }
@@ -147,7 +147,7 @@ impl PyRbfDeformer {
     fn deform(&self, points: Vec<[f64; 3]>) -> PyResult<Vec<[f64; 3]>> {
         match self.inner.deform(&points) {
             Ok(result) => Ok(result),
-            Err(err_str) => Err(PyValueError::new_err(err_str)),
+            Err(err) => Err(PyValueError::new_err(err.to_string())),
         }
     }
 }

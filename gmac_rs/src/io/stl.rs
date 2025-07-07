@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Read, Result, Seek, SeekFrom, Write};
+use std::io::{BufRead, BufReader, Read, Seek, SeekFrom, Write};
+
+use crate::error::{Result, Error};
 
 /// Enumeration of supported STL file formats.
 ///
@@ -297,10 +299,10 @@ pub fn read_stl_binary_from_buf<R: Read>(
 
     // Sanity check on number of triangles
     if num_triangles > 10_000_000 {
-        return Err(std::io::Error::new(
+        return Err(Error::FileSystem(std::io::Error::new(
             std::io::ErrorKind::InvalidData,
             format!("Too many triangles: {}", num_triangles),
-        ));
+        )));
     }
 
     let mut nodes: Vec<[f64; 3]> = Vec::with_capacity(num_triangles * 3);

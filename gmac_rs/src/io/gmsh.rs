@@ -1,5 +1,7 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader, Error};
+use std::io::{BufRead, BufReader};
+
+use crate::error::Result;
 
 /// Reads a 3D mesh from a GMSH file.
 ///
@@ -10,7 +12,7 @@ use std::io::{BufRead, BufReader, Error};
 /// Returns a `Result` which contains a tuple (`Vec<[f64; 3]>`, `Vec<[usize; 3]>`)
 /// if the file is successfully read, or contains an error otherwise.
 #[allow(clippy::type_complexity)]
-pub fn read_gmsh(filename: &str) -> Result<(Vec<[f64; 3]>, Vec<[usize; 3]>), Error> {
+pub fn read_gmsh(filename: &str) -> Result<(Vec<[f64; 3]>, Vec<[usize; 3]>)> {
     let mut nodes = Vec::new();
     let mut elements = Vec::new();
     let mut phys_names = false;
