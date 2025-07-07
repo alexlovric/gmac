@@ -123,7 +123,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [2.8, 1.0, 2.8], // Slightly larger than the original box
         [0.0, 0.0, 0.0], // Centered at the origin
         [0.0, 0.0, 0.0], // No rotation
-        [3, 3, 3],       // Number of control points in each direction
+        [3, 3, 3],       // Control points in each direction
     )?;
 
     // Select control points that lie in a plane defined 
