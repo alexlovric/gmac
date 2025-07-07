@@ -1,8 +1,5 @@
 from .gmac import (
     Mesh,
-    DesignBlock,
-    FreeFormDeformer,
-    RbfDeformer,
     select_nodes_closest_to_point,
     select_nodes_closest_to_plane,
     select_nodes_in_plane_direction,
@@ -25,24 +22,6 @@ from .gmac import (
     generate_block_cluster,
     generate_sphere_cluster,
 )
-
-
-# def mesh_from_trimesh(trimesh: object) -> Mesh:
-#     """
-#     Get mesh from trimesh object.
-
-#     Parameters
-#     ----------
-#     trimesh : object
-
-#     Returns
-#     -------
-#     Mesh
-#         Gmac mesh.
-#     """
-#     return Mesh(trimesh.vertices, trimesh.faces)
-
-# gmac.__all__.append("mesh_from_trimesh")
 
 __doc__ = gmac.__doc__
 if hasattr(gmac, "__all__"):

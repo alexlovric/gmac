@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     // Create a Free-Form Deformer with original design block
-    let ffd = FreeFormDeformer::new(design_block);
+    let ffd = FreeFormDeformer::new(design_block)?;
 
     // Apply the deformation to the original geometry
     geometry.nodes = ffd.deform(&geometry.nodes, &deformed_design_nodes)?;

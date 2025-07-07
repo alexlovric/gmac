@@ -1,3 +1,1 @@
-from ..gmac import RbfDeformer
-from ..gmac import DesignBlock
-from ..gmac import FreeFormDeformer
+from ..gmac import RbfDeformer, DesignBlock, FreeFormDeformer

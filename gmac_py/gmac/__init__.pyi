@@ -33,6 +33,22 @@ class Mesh:
             The mesh.
         """
 
+    @classmethod
+    def from_obj(cls, filename: str) -> Mesh:
+        """
+        Instantiate mesh from an obj file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the obj file.
+
+        Returns
+        -------
+        Mesh
+            The mesh.
+        """
+
     def triangles(self) -> list[list[tuple[float, float, float]]]:
         """
         Get triangles that make up the mesh cells.
@@ -96,6 +112,16 @@ class Mesh:
             Format of the stl file. Defaults to "binary".
         """
 
+    def write_obj(self, filename: str | None) -> None:
+        """
+        Write an obj file from the nodes and cells.
+
+        Parameters
+        ----------
+        filename : str | None
+            Optional filename. Defaults to mesh.obj
+        """
+
     def write_vtp(self, filename: str | None) -> None:
         """
         Write an VTP file from the nodes.
@@ -103,7 +129,7 @@ class Mesh:
         Parameters
         ----------
         filename : str | None
-            Optional filename. Defaults to mesh.stl
+            Optional filename. Defaults to mesh.vtp
         """
 
 def select_nodes_closest_to_point(

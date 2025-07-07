@@ -17,10 +17,14 @@ use py_transformation::{
 };
 
 pub mod py_primitives;
-use py_primitives::{py_generate_box, py_generate_naca_wing, py_generate_block_cluster};
+use py_primitives::{
+    py_generate_box, py_generate_capsule, py_generate_cone, py_generate_cylinder,
+    py_generate_icosphere, py_generate_naca_wing, py_generate_torus,
+    py_generate_uvsphere, py_generate_block_cluster, py_generate_sphere_cluster,
+};
 
 pub mod py_io;
-use py_io::{py_write_stl, py_write_vtp};
+use py_io::{py_write_stl, py_write_vtp, py_write_obj, py_read_stl, py_read_obj};
 
 pub mod py_morph;
 use py_morph::{PyRbfDeformer, PyDesignBlock, PyFreeFormDeformer};
@@ -47,12 +51,22 @@ fn gmac(_py: Python, m: &PyModule) -> PyResult<()> {
 
     // Primitives
     m.add_function(wrap_pyfunction!(py_generate_box, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_capsule, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_cone, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_cylinder, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_icosphere, m)?)?;
     m.add_function(wrap_pyfunction!(py_generate_naca_wing, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_torus, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_uvsphere, m)?)?;
     m.add_function(wrap_pyfunction!(py_generate_block_cluster, m)?)?;
+    m.add_function(wrap_pyfunction!(py_generate_sphere_cluster, m)?)?;
 
     // IO
     m.add_function(wrap_pyfunction!(py_write_stl, m)?)?;
     m.add_function(wrap_pyfunction!(py_write_vtp, m)?)?;
+    m.add_function(wrap_pyfunction!(py_write_obj, m)?)?;
+    m.add_function(wrap_pyfunction!(py_read_stl, m)?)?;
+    m.add_function(wrap_pyfunction!(py_read_obj, m)?)?;
 
     // Deformers
     m.add_class::<PyRbfDeformer>()?;

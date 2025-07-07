@@ -30,3 +30,33 @@ def write_stl(
     filename : str | None
         Optional filename. Defaults to mesh.stl
     """
+
+def read_stl(filename: str) -> tuple[list[list[float]], list[list[int]]]:
+    """
+    Read a stl file and return nodes and cells.
+
+    Parameters
+    ----------
+    filename : str
+        The filename of the stl file.
+
+    Returns
+    -------
+    tuple[list[list[float]], list[list[int]]]
+        The nodes and cells of the stl file.
+    """
+
+def read_obj(filename: str) -> tuple[list[list[float]], list[list[int]]]:
+    """
+    Read a obj file and return nodes and cells.
+
+    Parameters
+    ----------
+    filename : str
+        The filename of the obj file.
+
+    Returns
+    -------
+    tuple[list[list[float]], list[list[int]]]
+        The nodes and cells of the obj file.
+    """
