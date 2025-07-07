@@ -70,7 +70,9 @@ pub fn apply_bernstein_transform(
     let transformed_points: Vec<[f64; 3]> = points
         .par_iter()
         .map(|point| {
-            transform_single_point(point, deltas, &dimension, &coeffs_x, &coeffs_y, &coeffs_z)
+            transform_single_point(
+                point, deltas, &dimension, &coeffs_x, &coeffs_y, &coeffs_z,
+            )
         })
         .collect();
 

@@ -23,7 +23,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [2.0, 1.0, 1.0], // Dimensions (length, width, height)
         [0.0, 0.0, 0.0], // Center coordinates
         [0.0, 0.0, 0.0], // Rotation angles (degrees)
-        [12, 12, 12],       // Number of divisions in each direction
+        [12, 12, 12],    // Number of divisions in each direction
     );
 
     // Alternative: Load geometry from an STL file
@@ -49,9 +49,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a transformation matrix that combines translation, rotation, and scaling
     let transform_matrix = build_transformation_matrix(
-        [0.25, 0.0, 0.0], // Translation vector (x, y, z)
+        [0.25, 0.0, 0.0],  // Translation vector (x, y, z)
         [125.0, 0.0, 0.0], // Rotation angles (degrees) around x, y, z axes
-        [1.0, 1.25, 1.25],  // Scaling factors in x, y, z directions
+        [1.0, 1.25, 1.25], // Scaling factors in x, y, z directions
     );
 
     // Create a copy of the original control points to modify
@@ -76,7 +76,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Deformation took: {}ms", elapsed.as_millis());
 
-    write_vtp(&deformed_design_nodes, Some("target/deformed_design_block.vtp"))?;
+    write_vtp(
+        &deformed_design_nodes,
+        Some("target/deformed_design_block.vtp"),
+    )?;
 
     // Save the final deformed geometry as an STL file
     geometry.write_stl(Some("target/deformed.stl"), Some(StlFormat::Binary))?;

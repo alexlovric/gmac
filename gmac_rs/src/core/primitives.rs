@@ -1,10 +1,198 @@
+use std::collections::HashMap;
+
 use crate::{
     core::mesh::Mesh,
     core::transformation::{build_rotation_matrix, rotate_node},
 };
 
-/// Creates a new box mesh. A box here is a shell, in that it is only the walls of
-/// a block.
+use std::f64::consts::PI;
+
+/// Generates a high-quality sphere mesh using icosahedron subdivision.
+///
+/// # Arguments
+/// * `radius`: The desired radius of the sphere.
+/// * `subdivisions`: The number of times to subdivide the mesh. 0 = base icosahedron.
+///                  A value of 4 or 5 provides a nicely detailed sphere.
+///
+/// # Returns
+/// Returns a `Mesh` instance containing the generated sphere.
+pub fn generate_icosphere(radius: f64, subdivisions: u32) -> Mesh {
+    // 12 vertices of a base icosahedron
+    let t = (1.0 + 5.0_f64.sqrt()) / 2.0; // Golden ratio
+    let mut nodes = vec![
+        [-1.0, t, 0.0],
+        [1.0, t, 0.0],
+        [-1.0, -t, 0.0],
+        [1.0, -t, 0.0],
+        [0.0, -1.0, t],
+        [0.0, 1.0, t],
+        [0.0, -1.0, -t],
+        [0.0, 1.0, -t],
+        [t, 0.0, -1.0],
+        [t, 0.0, 1.0],
+        [-t, 0.0, -1.0],
+        [-t, 0.0, 1.0],
+    ];
+
+    // 20 triangular faces of the icosahedron
+    let mut cells = vec![
+        [0, 11, 5],
+        [0, 5, 1],
+        [0, 1, 7],
+        [0, 7, 10],
+        [0, 10, 11],
+        [1, 5, 9],
+        [5, 11, 4],
+        [11, 10, 2],
+        [10, 7, 6],
+        [7, 1, 8],
+        [3, 9, 4],
+        [3, 4, 2],
+        [3, 2, 6],
+        [3, 6, 8],
+        [3, 8, 9],
+        [4, 9, 5],
+        [2, 4, 11],
+        [6, 2, 10],
+        [8, 6, 7],
+        [9, 8, 1],
+    ];
+
+    let mut midpoint_cache: HashMap<(usize, usize), usize> = HashMap::new();
+
+    // Helper function to get the midpoint of an edge
+    let get_midpoint =
+        |p1_idx: usize,
+         p2_idx: usize,
+         nodes: &mut Vec<[f64; 3]>,
+         cache: &mut HashMap<(usize, usize), usize>| {
+            // Create a sorted key to ensure we find the midpoint regardless of edge direction.
+            let key = if p1_idx < p2_idx {
+                (p1_idx, p2_idx)
+            } else {
+                (p2_idx, p1_idx)
+            };
+
+            *cache.entry(key).or_insert_with(|| {
+                let p1 = nodes[p1_idx];
+                let p2 = nodes[p2_idx];
+                let new_node_index = nodes.len();
+                nodes.push([
+                    (p1[0] + p2[0]) / 2.0,
+                    (p1[1] + p2[1]) / 2.0,
+                    (p1[2] + p2[2]) / 2.0,
+                ]);
+                new_node_index
+            })
+        };
+
+    // Subdivide the mesh for the desired level of detail
+    for _ in 0..subdivisions {
+        let mut new_cells = Vec::new();
+        for cell in &cells {
+            let p1 = cell[0];
+            let p2 = cell[1];
+            let p3 = cell[2];
+
+            // Get or create the midpoints of the triangle's edges
+            let a = get_midpoint(p1, p2, &mut nodes, &mut midpoint_cache);
+            let b = get_midpoint(p2, p3, &mut nodes, &mut midpoint_cache);
+            let c = get_midpoint(p3, p1, &mut nodes, &mut midpoint_cache);
+
+            // Replace the original triangle with 4 new ones
+            new_cells.push([p1, a, c]);
+            new_cells.push([p2, b, a]);
+            new_cells.push([p3, c, b]);
+            new_cells.push([a, b, c]);
+        }
+        cells = new_cells;
+    }
+
+    // Project all vertices onto the sphere by normalising and scaling them
+    for node in &mut nodes {
+        let norm = (node[0].powi(2) + node[1].powi(2) + node[2].powi(2)).sqrt();
+        if norm > f64::EPSILON {
+            node[0] = (node[0] / norm) * radius;
+            node[1] = (node[1] / norm) * radius;
+            node[2] = (node[2] / norm) * radius;
+        }
+    }
+
+    Mesh::new(nodes, cells)
+}
+
+/// Generates a sphere mesh using the UV mapping method.
+///
+/// # Arguments
+/// * `radius`: The desired radius of the sphere.
+/// * `sectors`: The number of vertical divisions (like longitude lines). Must be 3 or more.
+/// * `stacks`: The number of horizontal divisions (like latitude lines). Must be 2 or more.
+///
+/// # Returns
+/// Returns a `Mesh` instance containing the generated sphere.
+pub fn generate_uv_sphere(radius: f64, sectors: u32, stacks: u32) -> Mesh {
+    if sectors < 3 || stacks < 2 {
+        panic!("Sectors must be 3 or more, and stacks must be 2 or more.");
+    }
+
+    let mut nodes = Vec::new();
+    let mut cells = Vec::new();
+
+    // Generate Nodes
+    nodes.push([0.0, radius, 0.0]);
+
+    for i in 1..stacks {
+        let stack_angle = PI / 2.0 - (i as f64 / stacks as f64) * PI; // From PI/2 to -PI/2
+        let xy = radius * stack_angle.cos();
+        let y = radius * stack_angle.sin();
+
+        for j in 0..sectors {
+            let sector_angle = (j as f64 / sectors as f64) * 2.0 * PI; // From 0 to 2*PI
+            let x = xy * sector_angle.cos();
+            let z = xy * sector_angle.sin();
+            nodes.push([x, y, z]);
+        }
+    }
+    nodes.push([0.0, -radius, 0.0]);
+
+    // Generate Cells (Triangles)
+    let north_pole_index = 0;
+    let south_pole_index = nodes.len() - 1;
+
+    for i in 0..sectors {
+        let p1 = north_pole_index;
+        let p2 = i as usize + 1;
+        let p3 = ((i + 1) % sectors) as usize + 1;
+        cells.push([p1, p3, p2]);
+    }
+
+    for i in 0..stacks - 2 {
+        let current_stack_start = i * sectors + 1;
+        let next_stack_start = (i + 1) * sectors + 1;
+        for j in 0..sectors {
+            // Indices of the four corners of the current quad
+            let p1 = current_stack_start as usize + j as usize;
+            let p2 = current_stack_start as usize + ((j + 1) % sectors) as usize;
+            let p3 = next_stack_start as usize + j as usize;
+            let p4 = next_stack_start as usize + ((j + 1) % sectors) as usize;
+
+            cells.push([p1, p2, p4]);
+            cells.push([p4, p3, p1]);
+        }
+    }
+
+    let bottom_stack_start = (stacks - 2) * sectors + 1;
+    for i in 0..sectors {
+        let p1 = south_pole_index;
+        let p2 = bottom_stack_start as usize + i as usize;
+        let p3 = bottom_stack_start as usize + ((i + 1) % sectors) as usize;
+        cells.push([p1, p2, p3]);
+    }
+
+    Mesh::new(nodes, cells)
+}
+
+/// Creates a standard 6 sided box mesh.
 ///
 /// # Arguments
 /// * `length`: An array `[x, y, z]` that specifies the dimensions of the box.
@@ -15,11 +203,6 @@ use crate::{
 ///
 /// # Returns
 /// Returns a `Result` containing the `Mesh` instance or an error message.
-///
-/// # Example
-/// ```
-/// let box = generate_box([1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [2, 2, 2]);
-/// ```    
 pub fn generate_box(
     length: [f64; 3],
     centre: [f64; 3],
@@ -166,6 +349,78 @@ pub fn generate_box(
 
             cells.push([p1, p3, p4]);
             cells.push([p4, p2, p1]);
+        }
+    }
+
+    Mesh::new(nodes, cells)
+}
+
+/// Generates a cylinder mesh with closed caps.
+///
+/// # Arguments
+/// * `radius`: The radius of the cylinder.
+/// * `height`: The height of the cylinder.
+/// * `sectors`: The number of divisions around the circumference. Must be 3 or more.
+/// * `stacks`: The number of divisions along the height. Must be 1 or more.
+///
+/// # Returns
+/// A tuple containing:
+/// - `Vec<[f64; 3]>`: A vector of vertex positions (`nodes`).
+/// - `Vec<[usize; 3]>`: A vector of triangle indices (`cells`).
+pub fn generate_cylinder(radius: f64, height: f64, sectors: u32, stacks: u32) -> Mesh {
+    if sectors < 3 || stacks < 1 {
+        panic!("Sectors must be 3 or more, and stacks must be 1 or more.");
+    }
+
+    let mut nodes = Vec::new();
+    let mut cells = Vec::new();
+    let half_height = height / 2.0;
+
+    // Generate Nodes
+    let bottom_center_idx = nodes.len();
+    nodes.push([0.0, -half_height, 0.0]);
+    let top_center_idx = nodes.len();
+    nodes.push([0.0, half_height, 0.0]);
+
+    for i in 0..=stacks {
+        let y = -half_height + (i as f64 / stacks as f64) * height;
+        for j in 0..sectors {
+            let angle = (j as f64 / sectors as f64) * 2.0 * PI;
+            let x = radius * angle.cos();
+            let z = radius * angle.sin();
+            nodes.push([x, y, z]);
+        }
+    }
+
+    // Generate Cells
+    let wall_node_start_idx = 2;
+
+    for i in 0..sectors {
+        let p1 = bottom_center_idx;
+        let p2 = wall_node_start_idx + i as usize;
+        let p3 = wall_node_start_idx + ((i + 1) % sectors) as usize;
+        cells.push([p1, p3, p2]);
+    }
+
+    let top_ring_start_idx = wall_node_start_idx + (stacks * sectors) as usize;
+    for i in 0..sectors {
+        let p1 = top_center_idx;
+        let p2 = top_ring_start_idx + i as usize;
+        let p3 = top_ring_start_idx + ((i + 1) % sectors) as usize;
+        cells.push([p1, p2, p3]);
+    }
+
+    for i in 0..stacks {
+        let current_stack_start = wall_node_start_idx + (i * sectors) as usize;
+        let next_stack_start = wall_node_start_idx + ((i + 1) * sectors) as usize;
+        for j in 0..sectors {
+            let p1 = current_stack_start + j as usize;
+            let p2 = current_stack_start + ((j + 1) % sectors) as usize;
+            let p3 = next_stack_start + j as usize;
+            let p4 = next_stack_start + ((j + 1) % sectors) as usize;
+
+            cells.push([p1, p2, p4]);
+            cells.push([p4, p3, p1]);
         }
     }
 

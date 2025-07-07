@@ -98,7 +98,12 @@ pub fn write_stl_binary(
         let mut cursor = 0;
 
         // Write normal and vertices into the in-memory buffer
-        for f in normal.iter().chain(p1.iter()).chain(p2.iter()).chain(p3.iter()) {
+        for f in normal
+            .iter()
+            .chain(p1.iter())
+            .chain(p2.iter())
+            .chain(p3.iter())
+        {
             let bytes = (*f as f32).to_le_bytes();
             buffer[cursor..cursor + 4].copy_from_slice(&bytes);
             cursor += 4;
