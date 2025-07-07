@@ -17,6 +17,7 @@ from .gmac import (
     rotate_nodes,
     scale_nodes,
     transform_nodes,
+    transform_selected_nodes,
     build_transformation_matrix,
   
     # Primitives

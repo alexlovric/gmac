@@ -20,3 +20,6 @@ doctest = false
 [dependencies]
 pyo3 = {version="0.20.0", features = ["abi3-py38"]}
 gmac_rs = { path = "../gmac_rs" }
+
+[lints.clippy]
+type_complexity = "allow"

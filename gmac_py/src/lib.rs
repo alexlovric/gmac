@@ -13,7 +13,7 @@ use py_selection::{
 pub mod py_transformation;
 use py_transformation::{
     py_translate_nodes, py_rotate_nodes, py_scale_nodes, py_transform_nodes,
-    py_build_transformation_matrix,
+    py_transform_selected_nodes, py_build_transformation_matrix,
 };
 
 pub mod py_primitives;
@@ -47,6 +47,7 @@ fn gmac(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_rotate_nodes, m)?)?;
     m.add_function(wrap_pyfunction!(py_scale_nodes, m)?)?;
     m.add_function(wrap_pyfunction!(py_transform_nodes, m)?)?;
+    m.add_function(wrap_pyfunction!(py_transform_selected_nodes, m)?)?;
     m.add_function(wrap_pyfunction!(py_build_transformation_matrix, m)?)?;
 
     // Primitives

@@ -45,9 +45,9 @@ gm.io.write_vtp(
 )
 
 # Apply a transformation to the selected control points
-deformed_control_points = original_control_points.copy()
-deformed_control_points[target_control_point_ids] = gm.transform_nodes(
-    nodes=deformed_control_points[target_control_point_ids],
+deformed_control_points = gm.transform_selected_nodes(
+    nodes=original_control_points,
+    selected_ids=target_control_point_ids,
     transformation_matrix=gm.build_transformation_matrix(
         translation=[0.0, 0.0, 0.0],
         rotation=[45.0, 20.0, 0.0],

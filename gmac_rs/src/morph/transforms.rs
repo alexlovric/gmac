@@ -1,7 +1,7 @@
+use crate::error::Result;
+
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-
-use crate::error::Result;
 
 /// Apply an affine transformation to a set of 3D points.
 ///
@@ -17,23 +17,29 @@ pub fn apply_affine_transform(
     points: &[[f64; 3]],
     affine_weights: &[[f64; 4]; 4],
 ) -> Result<Vec<[f64; 3]>> {
-    let padded_points = points
-        .iter()
-        .map(|&[x1, x2, x3]| vec![x1, x2, x3, 1.0])
-        .collect::<Vec<Vec<f64>>>();
-
-    let mut result = Vec::new();
-    for point in padded_points {
-        let mut transformed = [0.0; 4];
-        for i in 0..4 {
-            for j in 0..4 {
-                transformed[i] += point[j] * affine_weights[j][i];
-            }
+    let transformed_points = {
+        #[cfg(feature = "rayon")]
+        {
+            points.par_iter()
         }
-        result.push([transformed[0], transformed[1], transformed[2]]);
+        #[cfg(not(feature = "rayon"))]
+        {
+            points.iter()
+        }
     }
+    .map(|point| {
+        let mut transformed = [0.0; 3];
+        for i in 0..3 {
+            transformed[i] = point[0] * affine_weights[0][i]
+                + point[1] * affine_weights[1][i]
+                + point[2] * affine_weights[2][i]
+                + 1.0 * affine_weights[3][i];
+        }
+        transformed
+    })
+    .collect();
 
-    Ok(result)
+    Ok(transformed_points)
 }
 
 /// Apply a Bernstein transform to a set of 3D points.

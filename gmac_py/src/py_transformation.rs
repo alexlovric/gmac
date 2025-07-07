@@ -1,8 +1,8 @@
 use pyo3::prelude::*;
 
 use gmac::core::transformation::{
-    translate_nodes, rotate_nodes, scale_nodes, transform_nodes,
-    build_transformation_matrix,
+    build_transformation_matrix, rotate_nodes, scale_nodes, transform_nodes,
+    transform_selected_nodes, translate_nodes,
 };
 
 /// Translate nodes
@@ -46,6 +46,19 @@ pub fn py_transform_nodes(
 ) -> PyResult<Vec<[f64; 3]>> {
     transform_nodes(&mut nodes, &transformation_matrix, &origin);
     Ok(nodes)
+}
+
+/// Transform selected nodes
+#[pyfunction(name = "transform_selected_nodes")]
+pub fn py_transform_selected_nodes(
+    nodes: Vec<[f64; 3]>,
+    selected_ids: Vec<usize>,
+    transformation_matrix: [[f64; 4]; 4],
+    origin: [f64; 3],
+) -> PyResult<Vec<[f64; 3]>> {
+    let transformed_nodes =
+        transform_selected_nodes(&nodes, &selected_ids, &transformation_matrix, &origin);
+    Ok(transformed_nodes)
 }
 
 /// Transformation matrix

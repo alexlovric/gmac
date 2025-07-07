@@ -135,3 +135,26 @@ class DesignBlock:
         list[int]
             The indices of the free design nodes.
         """
+
+    def transform_subset(
+        self,
+        node_ids: list[int],
+        transform_matrix: list[list[float]],
+        pivot: list[float],
+    ) -> list[list[float]]:
+        """Transform a subset of nodes.
+
+        Parameters
+        ----------
+        node_ids : list[int]
+            Indices of the nodes to transform.
+        transform_matrix : list[list[float]]
+            Transformation matrix.
+        pivot : list[float]
+            Pivot point for transformations.
+
+        Returns
+        -------
+        list[list[float]]
+            Transformed node positions.
+        """

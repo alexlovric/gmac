@@ -1,8 +1,10 @@
 use crate::core::{
     clusters::generate_block_cluster,
-    transformation::{rotate_nodes, rotate_node, build_rotation_matrix},
     mesh::Mesh,
     selection::select_nodes_in_box,
+    transformation::{
+        build_rotation_matrix, rotate_node, rotate_nodes, transform_selected_nodes,
+    },
 };
 
 use crate::error::{Error, Result};
@@ -252,6 +254,24 @@ impl DesignBlock {
             self.centre,
             self.theta,
         ))
+    }
+
+    /// Creates a new set of nodes by applying a transformation to a subset of the original nodes.
+    ///
+    /// # Arguments
+    /// * `node_ids`: A slice of indices corresponding to the control points to be transformed.
+    /// * `transform_matrix`: The 4x4 affine transformation matrix to apply.
+    /// * `pivot`: The point around which the transformation (like rotation) should occur.
+    ///
+    /// # Returns
+    /// A new `Vec<[f64; 3]>` containing the full set of nodes with the specified subset transformed.
+    pub fn transform_subset(
+        &self,
+        node_ids: &[usize],
+        transform_matrix: &[[f64; 4]; 4],
+        pivot: &[f64; 3],
+    ) -> Vec<[f64; 3]> {
+        transform_selected_nodes(&self.nodes, node_ids, transform_matrix, pivot)
     }
 }
 

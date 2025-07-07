@@ -18,6 +18,35 @@ pub fn transform_nodes(
     }
 }
 
+/// Creates a new set of nodes by applying a transformation to a specified subset.
+///
+/// This function is non-mutating; it returns a new vector with the transformed points.
+///
+/// # Arguments
+/// * `original_nodes`: A slice of the initial node positions.
+/// * `node_ids`: A slice of indices specifying which nodes to transform.
+/// * `transform_matrix`: The 4x4 affine transformation matrix to apply.
+/// * `origin`: The point around which the transformation (e.g., rotation) should occur.
+///
+/// # Returns
+/// A new `Vec<[f64; 3]>` containing the full set of nodes with the specified subset transformed.
+pub fn transform_selected_nodes(
+    original_nodes: &[[f64; 3]],
+    node_ids: &[usize],
+    transform_matrix: &[[f64; 4]; 4],
+    origin: &[f64; 3],
+) -> Vec<[f64; 3]> {
+    let mut transformed_nodes = original_nodes.to_vec();
+
+    for &id in node_ids {
+        if id < transformed_nodes.len() {
+            transform_node(&mut transformed_nodes[id], transform_matrix, origin);
+        }
+    }
+
+    transformed_nodes
+}
+
 /// Transforms a node using a 4x4 transformation matrix.
 ///
 /// # Arguments

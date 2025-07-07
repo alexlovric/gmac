@@ -7,7 +7,6 @@ by manipulating a grid of control points.
 """
 
 import gmac as gm
-import numpy as np
 
 # Create a simple geometry or import one
 mesh = gm.generate_box(
@@ -37,21 +36,18 @@ gm.io.write_vtp(design_block.nodes, "design_nodes.vtp")
 # The second parameter (2) specifies the number of fixed layers of control points at the boundaries
 free_design_ids = design_block.select_free_design_nodes(mesh, 2)
 
-# Create a transformation matrix that combines translation, rotation, and scaling
+# Transform only the free control points using the transformation matrix
 transformation_matrix = gm.build_transformation_matrix(
     [0.25, 0.0, 0.0],  # Translation vector (x, y, z)
     [125.0, 0.0, 0.0],  # Rotation angles (degrees) around x, y, z axes
     [1.0, 1.25, 1.25],  # Scaling factors in x, y, z directions
 )
 
-# Transform only the free control points using the transformation matrix
-deformed_design_nodes = np.array(
-    design_block.nodes
-)  # Create a copy of the original nodes
-deformed_design_nodes[free_design_ids] = gm.transform_nodes(
-    deformed_design_nodes[free_design_ids],  # Points to transform
-    transformation_matrix,  # Combined transformation matrix
-    [0.2, 0.0, 0.0],  # Pivot point for transformations
+deformed_design_nodes = gm.transform_selected_nodes(
+    design_block.nodes,
+    free_design_ids,
+    transformation_matrix,
+    [0.2, 0.0, 0.0],
 )
 
 # Save the deformed control points for visualisation

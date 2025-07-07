@@ -30,3 +30,9 @@ intel-mkl = ["hologram/intel-mkl"]
 
 [dev-dependencies]
 approx = "0.5"
+
+[lints.clippy]
+type_complexity = "allow"
+needless_range_loop = "allow"
+doc_lazy_continuation = "allow"
+doc_overindented_list_items = "allow"

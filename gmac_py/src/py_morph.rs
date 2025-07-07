@@ -64,6 +64,17 @@ impl PyDesignBlock {
             Err(err) => Err(PyValueError::new_err(err.to_string())),
         }
     }
+
+    pub fn transform_subset(
+        &self,
+        node_ids: Vec<usize>,
+        transform_matrix: [[f64; 4]; 4],
+        pivot: [f64; 3],
+    ) -> PyResult<Vec<[f64; 3]>> {
+        Ok(self
+            .inner
+            .transform_subset(&node_ids, &transform_matrix, &pivot))
+    }
 }
 
 impl From<PyDesignBlock> for DesignBlock {

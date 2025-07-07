@@ -9,10 +9,10 @@ use std::time::Instant;
 use gmac::{
     core::{
         primitives::generate_box,
-        transformation::{build_transformation_matrix, transform_node},
+        transformation::{build_transformation_matrix, transform_selected_nodes},
     },
     io::{stl::StlFormat, vtk::write_vtp},
-    morph::{ffd::FreeFormDeformer, design_block::DesignBlock},
+    morph::{design_block::DesignBlock, ffd::FreeFormDeformer},
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -48,31 +48,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a transformation matrix that combines translation, rotation, and scaling
     let transform_matrix = build_transformation_matrix(
-        [0.25, 0.0, 0.0],  // Translation vector (x, y, z)
-        [125.0, 0.0, 0.0], // Rotation angles (degrees) around x, y, z axes
-        [1.0, 1.25, 1.25], // Scaling factors in x, y, z directions
+        [0.25, 0.0, 0.0],
+        [125.0, 0.0, 0.0],
+        [1.0, 1.25, 1.25],
     );
 
-    // Create a copy of the original control points to modify
-    let mut deformed_design_nodes = design_block.nodes.clone();
-
     // Apply the transformation to each free control point
-    free_design_ids.iter().for_each(|&id| {
-        transform_node(
-            &mut deformed_design_nodes[id], // The control point to transform
-            &transform_matrix,              // The transformation to apply
-            &[0.2, 0., 0.],                 // Pivot point for transformations
-        )
-    });
+    let deformed_design_nodes = transform_selected_nodes(
+        &design_block.nodes,
+        &free_design_ids,
+        &transform_matrix,
+        &[0.2, 0.0, 0.0], // Pivot point
+    );
 
     // Create a Free-Form Deformer with the original design block
     let deformation_timer = Instant::now();
-    
+
     let ffd = FreeFormDeformer::new(design_block)?;
 
     // Apply the deformation to the original geometry using the deformed control points
     mesh.nodes = ffd.deform(&mesh.nodes, &deformed_design_nodes)?;
-    
+
     let elapsed = deformation_timer.elapsed();
     println!("Deformation took: {}ms", elapsed.as_millis());
 

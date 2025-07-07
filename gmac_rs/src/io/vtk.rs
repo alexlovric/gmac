@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 
-use crate::error::{Result};
+use crate::error::Result;
 
 #[cfg(feature = "rayon")]
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -328,4 +328,127 @@ pub fn read_vtp(filename: &str) -> Result<Vec<[f64; 3]>> {
     }
 
     Ok(nodes)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::error::Error;
+    use std::fs::{remove_file, File};
+    use std::io::Write;
+
+    /// Helper function to create a temporary file with specific content for a test.
+    fn create_temp_file(filename: &str, content: &str) -> Result<()> {
+        let mut file = File::create(filename)?;
+        writeln!(file, "{}", content)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_vtp() {
+        let filename = "test_points.vtp";
+        let vtp_content = r#"
+            <?xml version="1.0"?>
+            <VTKFile type="PolyData" version="1.1">
+              <PolyData>
+                <Piece NumberOfPoints="3" NumberOfVerts="3">
+                  <Points>
+                    <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii">
+                      1.0 2.0 3.0
+                      4.0 5.0 6.0 7.0 8.0 9.0
+                    </DataArray>
+                  </Points>
+                  <Verts>
+                    </Verts>
+                </Piece>
+              </PolyData>
+            </VTKFile>
+        "#;
+
+        create_temp_file(filename, vtp_content).unwrap();
+        let nodes = read_vtp(filename).unwrap();
+        remove_file(filename).unwrap();
+
+        assert_eq!(nodes.len(), 3);
+        assert_eq!(nodes[0], [1.0, 2.0, 3.0]);
+        assert_eq!(nodes[1], [4.0, 5.0, 6.0]);
+        assert_eq!(nodes[2], [7.0, 8.0, 9.0]);
+    }
+
+    #[test]
+    fn test_read_vtu() {
+        let filename = "test_mesh.vtu";
+        let vtu_content = r#"
+            <?xml version="1.0"?>
+            <VTKFile type="UnstructuredGrid" version="1.1">
+              <UnstructuredGrid>
+                <Piece NumberOfPoints="4" NumberOfCells="2">
+                  <Points>
+                    <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii">
+                      0 0 0  1 0 0
+                      1 1 0  0 1 0
+                    </DataArray>
+                  </Points>
+                  <Cells>
+                    <DataArray type="Int64" Name="connectivity" format="ascii">
+                      0 1 2
+                      0 2 3
+                    </DataArray>
+                    </Cells>
+                </Piece>
+              </UnstructuredGrid>
+            </VTKFile>
+        "#;
+
+        create_temp_file(filename, vtu_content).unwrap();
+        let (nodes, cells) = read_vtu(filename).unwrap();
+        remove_file(filename).unwrap();
+
+        assert_eq!(nodes.len(), 4);
+        assert_eq!(cells.len(), 2);
+        assert_eq!(nodes[3], [0.0, 1.0, 0.0]);
+        assert_eq!(cells[0], [0, 1, 2]);
+        assert_eq!(cells[1], [0, 2, 3]);
+    }
+
+    #[test]
+    fn test_read_file_not_found() {
+        let result = read_vtu("a_file_that_does_not_exist.vtu");
+        assert!(result.is_err());
+        assert!(matches!(result, Err(Error::FileSystem(_))));
+    }
+
+    #[test]
+    fn test_write_vtp() {
+        let original_nodes = vec![[1.1, 2.2, 3.3], [4.4, 5.5, 6.6]];
+        let filename = "roundtrip.vtp";
+
+        write_vtp(&original_nodes, Some(filename)).unwrap();
+        let read_nodes = read_vtp(filename).unwrap();
+
+        assert_eq!(original_nodes.len(), read_nodes.len());
+        for (original, read) in original_nodes.iter().zip(read_nodes.iter()) {
+            assert!((original[0] - read[0]).abs() < 1e-9);
+            assert!((original[1] - read[1]).abs() < 1e-9);
+            assert!((original[2] - read[2]).abs() < 1e-9);
+        }
+
+        remove_file(filename).unwrap();
+    }
+
+    #[test]
+    fn test_write_vtu() {
+        let original_nodes = vec![[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
+        let original_cells = vec![[0, 1, 2]];
+        let filename = "roundtrip.vtu";
+
+        write_vtu(&original_nodes, &original_cells, Some(filename)).unwrap();
+        let (read_nodes, read_cells) = read_vtu(filename).unwrap();
+
+        assert_eq!(original_nodes.len(), read_nodes.len());
+        assert_eq!(original_cells, read_cells);
+        assert_eq!(original_nodes, read_nodes);
+
+        remove_file(filename).unwrap();
+    }
 }

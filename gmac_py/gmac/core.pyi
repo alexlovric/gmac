@@ -357,6 +357,32 @@ def transform_nodes(
         The transformed nodes.
     """
 
+def transform_selected_nodes(
+    nodes: list[list[float]],
+    selected_ids: list[int],
+    transformation_matrix: list[list[float]],
+    origin: list[float] | None,
+) -> list[list[float]]:
+    """
+    Transforms selected nodes using a transformation matrix.
+
+    Parameters
+    ----------
+    nodes : list[list[float]]
+        The list of 3D points to select from.
+    selected_ids : list[int]
+        The indices of the nodes to transform.
+    transformation_matrix : list[list[float]]
+        A 4x4 transformation matrix.
+    origin : list[float]
+        A list of floats (x, y, z) that represent the origin of the transformation.
+
+    Returns
+    -------
+    list[list[float]]
+        The transformed nodes.
+    """
+
 def build_transformation_matrix(
     translation: list[float],
     rotation: list[float],

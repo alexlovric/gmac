@@ -6,11 +6,11 @@
 
 use std::time::Instant;
 
-use gmac::core::primitives::generate_torus;
 use gmac::core::{
-    clusters::generate_block_cluster, transformation::transform_node,
-    transformation::build_transformation_matrix,
+    clusters::generate_block_cluster,
+    primitives::generate_torus,
     selection::select_nodes_in_plane_direction,
+    transformation::{build_transformation_matrix, transform_selected_nodes},
 };
 use gmac::io::{stl::StlFormat, vtk::write_vtp};
 use gmac::morph::rbf::RbfDeformer;
@@ -48,26 +48,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         [1.0, 0.0, 0.0], // Normal vector (x-axis in this case)
     );
 
-    // Create a copy of the original control points to modify
-    let mut deformed_control_points = original_control_points.clone();
-
     // Apply transformation to the selected control points
     let transform_matrix = build_transformation_matrix(
-        [0.0, 0.0, 0.0],   // Move 1 unit in x-direction
-        [45.0, 20.0, 0.0], // Rotate 45 degrees around x-axis
-        [1.0, 1.0, 1.0],   // Scale y and z dimensions to 75%
+        [0.0, 0.0, 0.0],   // Translation
+        [45.0, 20.0, 0.0], // Rotation
+        [1.0, 1.0, 1.0],   // Scale
     );
 
-    // Apply the transformation to each selected control point
-    for &id in &target_control_point_ids {
-        let mut point = deformed_control_points[id];
-        transform_node(
-            &mut point,
-            &transform_matrix,
-            &[0.0, 0.0, 0.0], // Origin point for the transformation
-        );
-        deformed_control_points[id] = point;
-    }
+    let deformed_control_points = transform_selected_nodes(
+        &original_control_points,
+        &target_control_point_ids,
+        &transform_matrix,
+        &[0.0, 0.0, 0.0],
+    );
 
     // Save the deformed control points for visualization
     write_vtp(
@@ -85,11 +78,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(1.0),                 // Shape parameter for the RBF kernel
     )?;
 
-    let elapsed = deformation_timer.elapsed();
-    println!("Deformation took: {}ms", elapsed.as_millis());
-
     // Apply the RBF deformation to the original geometry
     mesh.nodes = rbf.deform(&mesh.nodes)?;
+
+    let elapsed = deformation_timer.elapsed();
+    println!("Deformation took: {}ms", elapsed.as_millis());
 
     // Save the final deformed geometry as an STL file
     mesh.write_stl(Some("target/deformed_torus.stl"), Some(StlFormat::Binary))?;

@@ -208,7 +208,7 @@ pub fn generate_box(
             "Invalid length: dimensions must be positive.".to_string(),
         ));
     }
-    if resolution.iter().any(|&rr| rr == 0) {
+    if resolution.contains(&0) {
         return Err(Error::MeshGeneration(
             "Invalid resolution: dimensions must be non-zero.".to_string(),
         ));
@@ -475,9 +475,9 @@ pub fn generate_torus(
     for i in 0..major_segments {
         for j in 0..minor_segments {
             let p1 = (i * (minor_segments + 1) + j) as usize;
-            let p2 = (p1 + 1) as usize;
+            let p2 = p1 + 1;
             let p3 = ((i + 1) * (minor_segments + 1) + j) as usize;
-            let p4 = (p3 + 1) as usize;
+            let p4 = p3 + 1;
 
             cells.push([p1, p3, p4]);
             cells.push([p4, p2, p1]);
